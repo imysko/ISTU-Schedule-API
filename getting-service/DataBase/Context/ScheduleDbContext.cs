@@ -1,15 +1,18 @@
-﻿using API.DataBase.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using getting_service.DataBase.Models;
 
-namespace API.DataBase.Context;
+namespace getting_service.DataBase.Context;
 
-public partial class ScheduleContext : DbContext
+public partial class ScheduleDbContext : DbContext
 {
-    public ScheduleContext()
+    private readonly string ConnectionString;
+    
+    public ScheduleDbContext(string connectionString)
     {
+        ConnectionString = connectionString;
     }
 
-    public ScheduleContext(DbContextOptions<ScheduleContext> options)
+    public ScheduleDbContext(DbContextOptions<ScheduleDbContext> options)
         : base(options)
     {
     }
@@ -27,6 +30,9 @@ public partial class ScheduleContext : DbContext
     public virtual DbSet<Schedule> Schedules { get; set; }
 
     public virtual DbSet<Teacher> Teachers { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=schedule_api;Username=ilia;Password=1453");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

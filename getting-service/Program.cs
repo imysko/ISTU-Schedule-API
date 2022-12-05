@@ -1,5 +1,8 @@
-﻿using TdLib.Bindings;
+﻿using getting_service.DataBase.Context;
+using TdLib.Bindings;
 using TdLib;
+using getting_service.DataBase.Controllers;
+using Microsoft.Extensions.Configuration;
 
 namespace getting_service;
 
@@ -7,23 +10,40 @@ internal static class Program
 {
     private const string ApplicationVersion = "1.0.0";
     
-    private static readonly int ApiId = Int32.Parse(Environment.GetEnvironmentVariable("ApiId")!);
-    private static readonly string ApiHash = Environment.GetEnvironmentVariable("ApiHash")!;
-    
-    private static readonly string PhoneNumber = Environment.GetEnvironmentVariable("PhoneNumber")!;
+    private static readonly int ApiId;
+    private static readonly string ApiHash;
 
-    private static TdClient _client;
+    private static readonly string PhoneNumber;
+
+    private static readonly TdClient Client;
     private static readonly ManualResetEventSlim ReadyToAuthenticate = new();
 
     private static bool _authNeeded;
     private static bool _passwordNeeded;
 
+    private static readonly ScheduleDbController Controller;
+
+    static Program()
+    {
+        var builder = new ConfigurationBuilder()
+            .AddJsonFile($"appsettings.json", true, true);
+        var config = builder.Build();
+
+        ApiId = Convert.ToInt32(config["ConnectionStrings:TelegramApiId"]);
+        ApiHash = config["ConnectionStrings:TelegramApiHash"]!;
+        PhoneNumber = config["ConnectionStrings:TelegramPhoneNumber"]!;
+
+        var context = new ScheduleDbContext(config["ConnectionStrings:ScheduleDB"]!);
+        Controller = new ScheduleDbController(context);
+        
+        Client = new TdClient();
+    }
+    
     private static async Task Main()
     {
-        _client = new TdClient();
-        _client.Bindings.SetLogVerbosityLevel(TdLogLevel.Fatal);
+        Client.Bindings.SetLogVerbosityLevel(TdLogLevel.Fatal);
 
-        _client.UpdateReceived += async (_, update) => { await ProcessUpdates(update); };
+        Client.UpdateReceived += async (_, update) => { await ProcessUpdates(update); };
 
         ReadyToAuthenticate.Wait();
 
@@ -53,7 +73,7 @@ internal static class Program
 
     private static async Task HandleAuthentication()
     {
-        await _client.ExecuteAsync(new TdApi.SetAuthenticationPhoneNumber
+        await Client.ExecuteAsync(new TdApi.SetAuthenticationPhoneNumber
         {
             PhoneNumber = PhoneNumber
         });
@@ -61,7 +81,7 @@ internal static class Program
         Console.Write("Insert the login code: ");
         var code = Console.ReadLine();
 
-        await _client.ExecuteAsync(new TdApi.CheckAuthenticationCode
+        await Client.ExecuteAsync(new TdApi.CheckAuthenticationCode
         {
             Code = code
         });
@@ -71,7 +91,7 @@ internal static class Program
         Console.Write("Insert the password: ");
         var password = Console.ReadLine();
 
-        await _client.ExecuteAsync(new TdApi.CheckAuthenticationPassword
+        await Client.ExecuteAsync(new TdApi.CheckAuthenticationPassword
         {
             Password = password
         });
@@ -83,7 +103,7 @@ internal static class Program
         {
             case TdApi.Update.UpdateAuthorizationState { AuthorizationState: TdApi.AuthorizationState.AuthorizationStateWaitTdlibParameters }:
                 var filesLocation = Path.Combine(AppContext.BaseDirectory, "db");
-                await _client.ExecuteAsync(new TdApi.SetTdlibParameters
+                await Client.ExecuteAsync(new TdApi.SetTdlibParameters
                 {
                     Parameters = new TdApi.TdlibParameters
                     {
@@ -99,7 +119,7 @@ internal static class Program
                 break;
 
             case TdApi.Update.UpdateAuthorizationState { AuthorizationState: TdApi.AuthorizationState.AuthorizationStateWaitEncryptionKey }:
-                await _client.ExecuteAsync(new TdApi.CheckDatabaseEncryptionKey());
+                await Client.ExecuteAsync(new TdApi.CheckDatabaseEncryptionKey());
                 break;
 
             case TdApi.Update.UpdateAuthorizationState { AuthorizationState: TdApi.AuthorizationState.AuthorizationStateWaitPhoneNumber }:
@@ -131,7 +151,7 @@ internal static class Program
                         Console.WriteLine(document?.Document);
                         if (document != null)
                         {
-                            await TdApi.DownloadFileAsync(_client, document.Document.Document_.Id, 1);
+                            await TdApi.DownloadFileAsync(Client, document.Document.Document_.Id, 1);
                         }
                     }
                 }
@@ -142,7 +162,7 @@ internal static class Program
                 if (status)
                 {
                     var path = file.File.Local.Path;
-                    ScheduleController.LoadJson(path);
+                    await Controller.LoadJson(path);
                 }
                 break;
             
@@ -153,44 +173,9 @@ internal static class Program
         }
     }
     
-    private static async Task SaveInstitutes(string path)
-    {
-        
-    }
-    
-    private static async Task SaveGroups(string path)
-    {
-        
-    }
-
-    private static async Task SaveLessonsTime(string path)
-    {
-        
-    }
-    
-    private static async Task SaveTeachers(string path)
-    {
-        
-    }
-    
-    private static async Task SaveLessonsNames(string path)
-    {
-        
-    }
-    
-    private static async Task SaveClassrooms(string path)
-    {
-        
-    }
-    
-    private static async Task SaveSchedule(string path)
-    {
-        
-    }
-
     private static async Task<TdApi.User> GetCurrentUser()
     {
-        return await _client.ExecuteAsync(new TdApi.GetMe());
+        return await Client.ExecuteAsync(new TdApi.GetMe());
     }
 
     private static async Task SendMessageToBot(string text)
@@ -205,7 +190,7 @@ internal static class Program
             }
         };
             
-        await _client.ExecuteAsync(new TdApi.SendMessage()
+        await Client.ExecuteAsync(new TdApi.SendMessage()
         {
             ChatId = 5739830666,
             InputMessageContent = content
@@ -214,14 +199,14 @@ internal static class Program
     
     private static async IAsyncEnumerable<TdApi.Chat> GetChannels(int limit)
     {
-        var chats = await _client.ExecuteAsync(new TdApi.GetChats
+        var chats = await Client.ExecuteAsync(new TdApi.GetChats
         {
             Limit = limit
         });
 
         foreach (var chatId in chats.ChatIds)
         {
-            var chat = await _client.ExecuteAsync(new TdApi.GetChat
+            var chat = await Client.ExecuteAsync(new TdApi.GetChat
             {
                 ChatId = chatId
             });
