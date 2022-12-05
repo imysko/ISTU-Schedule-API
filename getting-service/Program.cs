@@ -46,8 +46,6 @@ internal static class Program
         {
             Console.WriteLine($"[{channel.Id}] -> [{channel.Title}] ({channel.UnreadCount} messages unread)");
         }
-
-        await SendMessageToBot("/api/institutes");
         
         Console.WriteLine("Press ENTER to exit from application");
         Console.ReadLine();
@@ -144,33 +142,7 @@ internal static class Program
                 if (status)
                 {
                     var path = file.File.Local.Path;
-                    switch(path)
-                    {
-                        case var _ when path.Contains("institutes"): 
-                            await SaveInstitutes(path);
-                            break;
-                        case var _ when path.Contains("groups"): 
-                            await SaveGroups(path);
-                            break;
-                        case var _ when path.Contains("lessons_time"): 
-                            await SaveLessonsTime(path);
-                            break;
-                        case var _ when path.Contains("teachers"): 
-                            await SaveTeachers(path);
-                            break;
-                        case var _ when path.Contains("lessons_names"): 
-                            await SaveLessonsNames(path);
-                            break;
-                        case var _ when path.Contains("classrooms"): 
-                            await SaveClassrooms(path);
-                            break;
-                        case var _ when path.Contains("month"): 
-                            await SaveSchedule(path);
-                            break;
-                        case var _ when path.Contains("two_weeks"): 
-                            await SaveSchedule(path);
-                            break;
-                    }
+                    ScheduleController.LoadJson(path);
                 }
                 break;
             
