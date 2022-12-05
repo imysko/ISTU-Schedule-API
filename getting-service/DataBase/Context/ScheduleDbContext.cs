@@ -90,8 +90,8 @@ public partial class ScheduleDbContext : DbContext
             entity.ToTable("lessons_time");
 
             entity.Property(e => e.LessonId).HasColumnName("lesson_id");
-            entity.Property(e => e.Begtime).HasColumnName("begtime");
-            entity.Property(e => e.Endtime).HasColumnName("endtime");
+            entity.Property(e => e.BegTime).HasColumnName("begtime");
+            entity.Property(e => e.EndTime).HasColumnName("endtime");
             entity.Property(e => e.LessonNumber).HasColumnName("lesson_number");
         });
 
@@ -105,7 +105,7 @@ public partial class ScheduleDbContext : DbContext
             entity.Property(e => e.ClassroomId).HasColumnName("classroom_id");
             entity.Property(e => e.ClassroomVerbose).HasColumnName("classroom_verbose");
             entity.Property(e => e.Date).HasColumnName("date");
-            entity.Property(e => e.DisciplineId).HasColumnName("discipline_id");
+            entity.Property(e => e.DisciplinesId).HasColumnName("discipline_id");
             entity.Property(e => e.DisciplineVerbose).HasColumnName("discipline_verbose");
             entity.Property(e => e.GroupsVerbose).HasColumnName("groups_verbose");
             entity.Property(e => e.LessonId).HasColumnName("lesson_id");
@@ -118,7 +118,7 @@ public partial class ScheduleDbContext : DbContext
                 .HasConstraintName("schedule_classrooms_null_fk");
 
             entity.HasOne(d => d.Discipline).WithMany(p => p.Schedules)
-                .HasForeignKey(d => d.DisciplineId)
+                .HasForeignKey(d => d.DisciplinesId)
                 .HasConstraintName("discipline_fk");
 
             entity.HasOne(d => d.Lesson).WithMany(p => p.Schedules)

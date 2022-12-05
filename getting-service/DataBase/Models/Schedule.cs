@@ -20,7 +20,7 @@ public partial class Schedule
     [JsonProperty("auditories_verbose")]
     public string? ClassroomVerbose { get; set; }
     
-    public int? DisciplineId { get; set; }
+    public int? DisciplinesId { get; set; }
     
     [JsonProperty("discipline_verbose")]
     public string? DisciplineVerbose { get; set; }

@@ -45,7 +45,7 @@ public class ScheduleDbController
                 await PutLessonsTime(response[key]!.ToObject<List<LessonsTime>>()!);
                 return;
             }
-            case "lessons_names":
+            case "disciplines":
             {
                 await PutDisciplines(response[key]!.ToObject<List<Discipline>>()!);
                 return;
