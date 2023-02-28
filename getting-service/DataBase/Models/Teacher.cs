@@ -12,4 +12,6 @@ public partial class Teacher
 
     [JsonProperty("shortname")]
     public string? Shortname { get; set; }
+    
+    public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
 }

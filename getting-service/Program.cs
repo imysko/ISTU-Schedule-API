@@ -15,6 +15,8 @@ internal static class Program
 
     private static readonly string PhoneNumber;
 
+    private static readonly long ChatBotId;
+
     private static readonly TdClient Client;
     private static readonly ManualResetEventSlim ReadyToAuthenticate = new();
 
@@ -32,6 +34,8 @@ internal static class Program
         ApiId = Convert.ToInt32(config["ConnectionStrings:TelegramApiId"]);
         ApiHash = config["ConnectionStrings:TelegramApiHash"]!;
         PhoneNumber = config["ConnectionStrings:TelegramPhoneNumber"]!;
+
+        ChatBotId = Convert.ToInt64(config["ConnectionStrings:ChatBotId"]);
 
         var context = new ScheduleDbContext(config["ConnectionStrings:ScheduleDB"]!);
         Controller = new ScheduleDbController(context);
@@ -192,7 +196,7 @@ internal static class Program
             
         await Client.ExecuteAsync(new TdApi.SendMessage()
         {
-            ChatId = 5739830666,
+            ChatId = ChatBotId,
             InputMessageContent = content
         });
     }

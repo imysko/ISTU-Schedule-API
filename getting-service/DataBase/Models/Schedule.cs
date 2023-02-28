@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace getting_service.DataBase.Models;
 
@@ -42,4 +40,8 @@ public partial class Schedule
     public virtual Discipline? Discipline { get; set; }
 
     public virtual LessonsTime? Lesson { get; set; }
+    
+    public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
+    
+    public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
 }

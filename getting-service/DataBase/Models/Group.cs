@@ -18,6 +18,7 @@ public partial class Group
     [JsonProperty("institute_id")]
     public int? InstituteId { get; set; }
 
-    
     public virtual Institute? Institute { get; set; }
+    
+    public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
 }

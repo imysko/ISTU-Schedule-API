@@ -95,6 +95,44 @@ public partial class ScheduleDbContext : DbContext
             entity.Property(e => e.LessonNumber).HasColumnName("lesson_number");
         });
 
+        modelBuilder.Entity<ScheduleGroup>(entity =>
+        {
+            entity.ToTable("schedule_groups");
+
+            entity.HasKey(e => new { e.ScheduleId, e.GroupId });
+
+            entity
+                .HasOne(e => e.Schedule)
+                .WithMany(e => e.ScheduleGroups)
+                .HasForeignKey(e => e.ScheduleId)
+                .HasConstraintName("schedule_groups_schedule_null_fk");
+            
+            entity
+                .HasOne(e => e.Group)
+                .WithMany(e => e.ScheduleGroups)
+                .HasForeignKey(e => e.GroupId)
+                .HasConstraintName("schedule_groups_groups_null_fk");
+        });
+        
+        modelBuilder.Entity<ScheduleTeacher>(entity =>
+        {
+            entity.ToTable("schedule_teachers");
+
+            entity.HasKey(e => new { e.ScheduleId, e.TeacherId });
+
+            entity
+                .HasOne(e => e.Schedule)
+                .WithMany(e => e.ScheduleTeachers)
+                .HasForeignKey(e => e.ScheduleId)
+                .HasConstraintName("schedule_teachers_schedule_null_fk");
+            
+            entity
+                .HasOne(e => e.Teacher)
+                .WithMany(e => e.ScheduleTeachers)
+                .HasForeignKey(e => e.TeacherId)
+                .HasConstraintName("schedule_teachers_teachers_null_fk");
+        });
+
         modelBuilder.Entity<Schedule>(entity =>
         {
             entity.HasKey(e => e.ScheduleId).HasName("schedule_pkey");
