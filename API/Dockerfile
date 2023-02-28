@@ -1,20 +1,21 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
+﻿# https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
-COPY ["API/API.csproj", "API/"]
-RUN dotnet restore "API/API.csproj"
+
+EXPOSE 5000
+ENV DOTNET_URLS=http://+:5000
+
+WORKDIR /source
+
+# copy csproj and restore as distinct layers
+COPY *.csproj .
+RUN dotnet restore --use-current-runtime
+
+# copy everything else and build app
 COPY . .
-WORKDIR "/src/API"
-RUN dotnet build "API.csproj" -c Release -o /app/build
+RUN dotnet publish -c Debug -o /app --use-current-runtime --self-contained false --no-restore
 
-FROM build AS publish
-RUN dotnet publish "API.csproj" -c Release -o /app/publish
-
-FROM base AS final
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "API.dll"]
+COPY --from=build /app .
+ENTRYPOINT ["dotnet", "API.dll", "--server.urls", "https://+:5000"]

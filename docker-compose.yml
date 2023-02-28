@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  schedule_api:
+    container_name: schedule-api
+    build: API
+    logging:
+      options:
+        max-size: "200M"
+        max-file: "4"
+    restart: always
+    ports:
+      - "7013:80"
