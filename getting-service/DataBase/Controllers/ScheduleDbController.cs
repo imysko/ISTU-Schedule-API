@@ -15,7 +15,7 @@ public class ScheduleDbController
     
     public async Task LoadJson(string path)
     {
-        JObject response = JObject.Parse(await File.ReadAllTextAsync(path));
+        var response = JObject.Parse(await File.ReadAllTextAsync(path));
         var key = response.First!.Path;
         
         switch (key)

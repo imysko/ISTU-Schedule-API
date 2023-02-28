@@ -146,18 +146,10 @@ internal static class Program
                 break;
 
             case TdApi.Update.UpdateNewMessage message:
-                if (message?.Message.Content is TdApi.MessageContent.MessageDocument)
+                if (message.Message.Content is TdApi.MessageContent.MessageDocument document)
                 {
-                    var content = message?.Message.Content;
-                    if (content is TdApi.MessageContent.MessageDocument)
-                    {
-                        var document = content as TdApi.MessageContent.MessageDocument;
-                        Console.WriteLine(document?.Document);
-                        if (document != null)
-                        {
-                            await TdApi.DownloadFileAsync(Client, document.Document.Document_.Id, 1);
-                        }
-                    }
+                    Console.WriteLine(document.Document);
+                    await Client.DownloadFileAsync(document.Document.Document_.Id, 1);
                 }
                 break;
 
@@ -168,11 +160,6 @@ internal static class Program
                     var path = file.File.Local.Path;
                     await Controller.LoadJson(path);
                 }
-                break;
-            
-            default:
-                // ReSharper disable once EmptyStatement
-                ;
                 break;
         }
     }
