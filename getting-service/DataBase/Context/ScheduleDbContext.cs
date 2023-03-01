@@ -32,7 +32,7 @@ public partial class ScheduleDbContext : DbContext
     public virtual DbSet<Teacher> Teachers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=schedule_api;Username=ilia;Password=1453");
+        => optionsBuilder.UseNpgsql("Host=172.28.223.52;Port=5432;Database=schedule;Username=yaroslav;Password=5825");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

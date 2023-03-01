@@ -2,7 +2,10 @@
 using TdLib.Bindings;
 using TdLib;
 using getting_service.DataBase.Controllers;
+using getting_service.DataBase.Models;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace getting_service;
 
@@ -24,6 +27,12 @@ internal static class Program
     private static bool _passwordNeeded;
 
     private static readonly ScheduleDbController Controller;
+
+    private static UpdateDate _updateDate = new();
+
+    private static readonly string RootPath = 
+        Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.FullName 
+        ?? string.Empty;
 
     static Program()
     {
@@ -70,6 +79,8 @@ internal static class Program
         {
             Console.WriteLine($"[{channel.Id}] -> [{channel.Title}] ({channel.UnreadCount} messages unread)");
         }
+
+        await GettingData();
         
         Console.WriteLine("Press ENTER to exit from application");
         Console.ReadLine();
@@ -207,5 +218,104 @@ internal static class Program
                 yield return chat;
             }
         }
+    }
+
+    private static async Task GettingData()
+    {
+        while (true)
+        {
+            var now = DateTime.Now;
+            var today = DateOnly.FromDateTime(now);
+            
+            await LoadJson();
+
+            if (_updateDate.Institutes <= today)
+            {
+                await GetInstitutes();
+            }
+            if (_updateDate.Groups <= today)
+            {
+                await GetGroups();
+            }
+            if (_updateDate.Teachers <= today)
+            {           
+                await GetTeachers();
+            }
+            if (_updateDate.LessonsNames <= today)
+            {
+                await GetLessonsNames();
+            }
+            if (_updateDate.Classrooms <= today)
+            {
+                await GetClassrooms();
+            }
+            if (_updateDate.ScheduleTwoWeeks <= today)
+            {
+                await GetScheduleTwoWeeks();
+            }
+            if (_updateDate.ScheduleHalfYear <= today)
+            {
+                await GetScheduleHalfYear();
+            }
+            
+            await using (var createStream = File.Open($"{RootPath}\\getting-service\\updatedates.json", FileMode.Create))
+            {
+                await JsonSerializer.SerializeAsync(createStream, _updateDate);
+            }
+
+            var tomorrow = now.AddDays(1);
+            var durationUntilMidnight = tomorrow.Date - now;
+            await Task.Delay(durationUntilMidnight);
+        }
+    }
+
+    private static async Task LoadJson()
+    {
+        using var r = new StreamReader($"{RootPath}\\getting-service\\updatedates.json");
+        var json = await r.ReadToEndAsync();
+        
+        _updateDate = JsonConvert.DeserializeObject<UpdateDate>(json) ?? new UpdateDate();
+    }
+
+    private static async Task GetInstitutes()
+    {
+        await SendMessageToBot("/api/institutes");
+        _updateDate.Institutes = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+    }
+
+    private static async Task GetGroups()
+    {
+        await SendMessageToBot("/api/groups");
+        _updateDate.Groups = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+    }
+    
+    private static async Task GetTeachers()
+    {
+        await SendMessageToBot("/api/teachers");
+        _updateDate.Teachers = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+    }
+    
+    private static async Task GetLessonsNames()
+    {
+        await SendMessageToBot("/api/lessons_names");
+        _updateDate.LessonsNames = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+    }
+    
+    private static async Task GetClassrooms()
+    {
+        await SendMessageToBot("/api/classrooms");
+        _updateDate.Classrooms = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+    }
+    
+    private static async Task GetScheduleTwoWeeks()
+    {
+        await SendMessageToBot("/api/schedule/two_weeks");
+        _updateDate.ScheduleTwoWeeks = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
+    }
+    
+    private static async Task GetScheduleHalfYear()
+    {
+        await SendMessageToBot("/api/schedule/months?count=3");
+        _updateDate.ScheduleHalfYear = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
     }
 }
