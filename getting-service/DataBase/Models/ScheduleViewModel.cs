@@ -2,22 +2,29 @@
 
 namespace getting_service.DataBase.Models;
 
-public partial class Schedule
+public class ScheduleViewModel
 {
     [JsonProperty("schedule_id")]
     public int ScheduleId { get; set; }
+    
+    [JsonProperty("groups_ids")]
+    public ICollection<int?>? GroupsIds { get; set; }
 
     [JsonProperty("groups_verbose")]
     public string? GroupsVerbose { get; set; }
 
+    [JsonProperty("teachers_ids")]
+    public ICollection<int?>? TeachersIds { get; set; }
+    
     [JsonProperty("teachers_verbose")]
     public string? TeachersVerbose { get; set; }
-
-    public int? ClassroomId { get; set; }
-
+    
+    [JsonProperty("auditories_ids")]
+    public ICollection<int?>? ClassroomsIds { get; set; }
+    
     [JsonProperty("auditories_verbose")]
-    public string? ClassroomVerbose { get; set; }
-
+    public string? ClassroomsVerbose { get; set; }
+    
     [JsonProperty("discipline_id")]
     public int? DisciplineId { get; set; }
     
@@ -34,15 +41,5 @@ public partial class Schedule
     public int? LessonType { get; set; }
     
     [JsonProperty("date")]
-    public DateOnly? Date { get; set; }
-
-    public virtual Classroom? Classroom { get; set; }
-    
-    public virtual Discipline? Discipline { get; set; }
-
-    public virtual LessonsTime? LessonTime { get; set; }
-    
-    public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
-    
-    public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
+    public string Date { get; set; }
 }

@@ -30,9 +30,13 @@ public partial class ScheduleDbContext : DbContext
     public virtual DbSet<Schedule> Schedules { get; set; }
 
     public virtual DbSet<Teacher> Teachers { get; set; }
+    
+    public virtual DbSet<ScheduleGroup> ScheduleGroups { get; set; }
+    
+    public virtual DbSet<ScheduleTeacher> ScheduleTeachers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=172.28.223.52;Port=5432;Database=schedule;Username=yaroslav;Password=5825");
+        => optionsBuilder.UseNpgsql(ConnectionString);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -143,7 +147,7 @@ public partial class ScheduleDbContext : DbContext
             entity.Property(e => e.ClassroomId).HasColumnName("classroom_id");
             entity.Property(e => e.ClassroomVerbose).HasColumnName("classroom_verbose");
             entity.Property(e => e.Date).HasColumnName("date");
-            entity.Property(e => e.DisciplinesId).HasColumnName("discipline_id");
+            entity.Property(e => e.DisciplineId).HasColumnName("discipline_id");
             entity.Property(e => e.DisciplineVerbose).HasColumnName("discipline_verbose");
             entity.Property(e => e.GroupsVerbose).HasColumnName("groups_verbose");
             entity.Property(e => e.LessonId).HasColumnName("lesson_id");
@@ -156,10 +160,10 @@ public partial class ScheduleDbContext : DbContext
                 .HasConstraintName("schedule_classrooms_null_fk");
 
             entity.HasOne(d => d.Discipline).WithMany(p => p.Schedules)
-                .HasForeignKey(d => d.DisciplinesId)
+                .HasForeignKey(d => d.DisciplineId)
                 .HasConstraintName("discipline_fk");
 
-            entity.HasOne(d => d.Lesson).WithMany(p => p.Schedules)
+            entity.HasOne(d => d.LessonTime).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.LessonId)
                 .HasConstraintName("lesson_time_fk");
         });
