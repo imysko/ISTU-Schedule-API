@@ -8,6 +8,7 @@ namespace getting_service.DataBase.Controllers;
 
 public class ScheduleDbController
 {
+    private readonly object _lock = new object();
     private readonly ScheduleDbContext _context;
     
     public ScheduleDbController(ScheduleDbContext context)
@@ -69,7 +70,7 @@ public class ScheduleDbController
         Console.ForegroundColor = ConsoleColor.DarkYellow;
         Console.WriteLine(DateTime.Now);
         Console.ResetColor();
-        
+
         list.ForEach(el =>
         {
             if (_context.Institutes.Any(c => c.InstituteId == el.InstituteId))
@@ -129,19 +130,25 @@ public class ScheduleDbController
         Console.ForegroundColor = ConsoleColor.DarkYellow;
         Console.WriteLine(DateTime.Now);
         Console.ResetColor();
-        
-        list.ForEach(el =>
+
+        lock (_lock)
         {
-            if (_context.Teachers.Any(c => c.TeacherId == el.TeacherId))
+            _context.Teachers.Load();
+        }
+        
+        foreach (var teacher in list)
+        {
+            var existingTeacher = _context.Teachers.Local.SingleOrDefault(c => c.TeacherId == teacher.TeacherId);
+
+            if (existingTeacher != null)
             {
-                _context.Entry(el).State = EntityState.Modified;
+                _context.Entry(existingTeacher).CurrentValues.SetValues(teacher);
             }
             else
             {
-                _context.Teachers.Add(el);
-                _context.Entry(el).State = EntityState.Added;
+                _context.Teachers.Add(teacher);
             }
-        });
+        }
 
         await _context.SaveChangesAsync();
         

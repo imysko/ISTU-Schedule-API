@@ -27,6 +27,10 @@ public partial class ScheduleContext : DbContext
     public virtual DbSet<Schedule> Schedules { get; set; }
 
     public virtual DbSet<Teacher> Teachers { get; set; }
+    
+    public virtual DbSet<ScheduleGroup> ScheduleGroups { get; set; }
+    
+    public virtual DbSet<ScheduleTeacher> ScheduleTeachers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +91,44 @@ public partial class ScheduleContext : DbContext
             entity.Property(e => e.Begtime).HasColumnName("begtime");
             entity.Property(e => e.Endtime).HasColumnName("endtime");
             entity.Property(e => e.LessonNumber).HasColumnName("lesson_number");
+        });
+
+        modelBuilder.Entity<ScheduleGroup>(entity =>
+        {
+            entity.ToTable("schedule_groups");
+
+            entity.HasKey(e => new { e.ScheduleId, e.GroupId });
+
+            entity
+                .HasOne(e => e.Schedule)
+                .WithMany(e => e.ScheduleGroups)
+                .HasForeignKey(e => e.ScheduleId)
+                .HasConstraintName("schedule_groups_schedule_null_fk");
+            
+            entity
+                .HasOne(e => e.Group)
+                .WithMany(e => e.ScheduleGroups)
+                .HasForeignKey(e => e.GroupId)
+                .HasConstraintName("schedule_groups_groups_null_fk");
+        });
+        
+        modelBuilder.Entity<ScheduleTeacher>(entity =>
+        {
+            entity.ToTable("schedule_teachers");
+
+            entity.HasKey(e => new { e.ScheduleId, e.TeacherId });
+
+            entity
+                .HasOne(e => e.Schedule)
+                .WithMany(e => e.ScheduleTeachers)
+                .HasForeignKey(e => e.ScheduleId)
+                .HasConstraintName("schedule_teachers_schedule_null_fk");
+            
+            entity
+                .HasOne(e => e.Teacher)
+                .WithMany(e => e.ScheduleTeachers)
+                .HasForeignKey(e => e.TeacherId)
+                .HasConstraintName("schedule_teachers_teachers_null_fk");
         });
 
         modelBuilder.Entity<Schedule>(entity =>

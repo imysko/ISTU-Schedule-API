@@ -32,4 +32,8 @@ public partial class Schedule
     public virtual Discipline? Discipline { get; set; }
 
     public virtual LessonsTime? Lesson { get; set; }
+    
+    public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
+    
+    public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
 }

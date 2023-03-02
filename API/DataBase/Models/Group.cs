@@ -14,4 +14,6 @@ public partial class Group
     public int? InstituteId { get; set; }
 
     public virtual Institute? Institute { get; set; }
+    
+    public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
 }

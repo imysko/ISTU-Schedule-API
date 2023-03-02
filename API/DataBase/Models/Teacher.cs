@@ -10,4 +10,6 @@ public partial class Teacher
     public string? Fullname { get; set; }
 
     public string? Shortname { get; set; }
+    
+    public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
 }
