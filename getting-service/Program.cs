@@ -159,7 +159,6 @@ internal static class Program
             case TdApi.Update.UpdateNewMessage message:
                 if (message.Message.Content is TdApi.MessageContent.MessageDocument document)
                 {
-                    Console.WriteLine(document.Document);
                     await Client.DownloadFileAsync(document.Document.Document_.Id, 1);
                 }
                 break;
