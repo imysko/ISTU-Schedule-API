@@ -248,13 +248,13 @@ internal static class Program
             {
                 await GetClassrooms();
             }
-            if (_updateDate.ScheduleTwoWeeks <= today)
-            {
-                await GetScheduleTwoWeeks();
-            }
             if (_updateDate.ScheduleHalfYear <= today)
             {
                 await GetScheduleHalfYear();
+            }
+            else if (_updateDate.ScheduleTwoWeeks <= today)
+            {
+                await GetScheduleTwoWeeks();
             }
             
             await using (var createStream = File.Open($"{RootPath}\\getting-service\\updatedates.json", FileMode.Create))
