@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.DataBase.Context;
 using API.DataBase.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Produces("application/json")]
+    [Route("schedule-api/schedules")]
     [ApiController]
     public class SchedulesController : ControllerBase
     {
@@ -21,88 +19,343 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/Schedules
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules()
+        [HttpGet("group-schedule/month")]
+        [SwaggerOperation(Summary = "Get group schedule for the month")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Month is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetMonthGroupSchedules(
+            [SwaggerParameter(Description = "Group Id")][Required][FromQuery]int groupId,
+            [SwaggerParameter(Description = "Number of month")][Required][FromQuery]int month)
         {
-            return await _context.Schedules.ToListAsync();
-        }
-
-        // GET: api/Schedules/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Schedule>> GetSchedule(int id)
-        {
-            var schedule = await _context.Schedules.FindAsync(id);
-
-            if (schedule == null)
-            {
-                return NotFound();
-            }
-
-            return schedule;
-        }
-
-        // PUT: api/Schedules/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSchedule(int id, Schedule schedule)
-        {
-            if (id != schedule.ScheduleId)
+            if (month is < 1 or > 12)
             {
                 return BadRequest();
             }
-
-            _context.Entry(schedule).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ScheduleExists(id))
+            
+            var schedules = await _context.Schedules
+                .Include(s => s.Classroom)
+                .Include(s => s.Discipline)
+                .Include(s => s.LessonTime)
+                .Include(s => s.ScheduleGroups)
+                .ThenInclude(sg => sg.Group)
+                .Include(s => s.ScheduleTeachers)
+                .ThenInclude(st => st.Teacher)
+                .Where(s => s.Date.Month == month)
+                .Where(s => s.ScheduleGroups.Any(sg => sg.GroupId == groupId))
+                .OrderBy(s => s.Date)
+                .GroupBy(s => s.Date)
+                .ToListAsync();
+            
+            return schedules.Any()? Ok(
+                schedules.Select(d => new StudyDay
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+                    Date = d.Key,
+                    Lessons = d
+                        .OrderBy(s => s.LessonId)
+                        .ThenBy(s => s.Subgroup)
+                        .ToList()   
+                })
+            ) : NotFound();
         }
-
-        // POST: api/Schedules
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Schedule>> PostSchedule(Schedule schedule)
+        
+        [HttpGet("group-schedule/weekly")]
+        [SwaggerOperation(Summary = "Get group weekly schedule")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetWeeklyGroupSchedules(
+            [SwaggerParameter(Description = "Group Id")][FromQuery][Required]int groupId,
+            [SwaggerParameter(Description = "Start date of week in standard ISO 8601 YYYY-MM-DD")]
+            [FromQuery][Required]string startDateWeekString)
         {
-            _context.Schedules.Add(schedule);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSchedule", new { id = schedule.ScheduleId }, schedule);
-        }
-
-        // DELETE: api/Schedules/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSchedule(int id)
-        {
-            var schedule = await _context.Schedules.FindAsync(id);
-            if (schedule == null)
+            if (!DateOnly.TryParseExact(startDateWeekString, "yyyy-MM-dd", out var startDateWeek))
             {
-                return NotFound();
+                return BadRequest();   
             }
-
-            _context.Schedules.Remove(schedule);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            
+            var schedules = await _context.Schedules
+             .Include(s => s.Classroom)
+             .Include(s => s.Discipline)
+             .Include(s => s.LessonTime)
+             .Include(s => s.ScheduleGroups)
+             .ThenInclude(sg => sg.Group)
+             .Include(s => s.ScheduleTeachers)
+             .ThenInclude(st => st.Teacher)
+             .Where(s => s.Date >= startDateWeek && s.Date <= startDateWeek.AddDays(6))
+             .Where(s => s.ScheduleGroups.Any(sg => sg.GroupId == groupId))
+             .OrderBy(s => s.Date)
+             .GroupBy(s => s.Date)
+             .ToListAsync();
+    
+            return schedules.Any()? Ok(
+                schedules.Select(d => new StudyDay
+                    {
+                        Date = d.Key,
+                        Lessons = d
+                            .OrderBy(s => s.LessonId)
+                            .ThenBy(s => s.Subgroup)
+                            .ToList()   
+                    })
+                ) : NotFound();
         }
-
-        private bool ScheduleExists(int id)
+        
+        [HttpGet("group-schedule/day")]
+        [SwaggerOperation(Summary = "Get group daily schedule")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<Schedule>>> GetDayGroupSchedules(
+            [SwaggerParameter(Description = "Group Id")][Required][FromQuery]int groupId,
+            [SwaggerParameter(Description = "Date in standard ISO 8601 YYYY-MM-DD")][Required][FromQuery]string dateString)
         {
-            return _context.Schedules.Any(e => e.ScheduleId == id);
+            if (!DateOnly.TryParseExact(dateString, "yyyy-MM-dd", out var dateOnly))
+            {
+                return BadRequest();   
+            }
+            
+            var schedules = await _context.Schedules
+                .Include(s => s.Classroom)
+                .Include(s => s.Discipline)
+                .Include(s => s.LessonTime)
+                .Include(s => s.ScheduleGroups)
+                .ThenInclude(sg => sg.Group)
+                .Include(s => s.ScheduleTeachers)
+                .ThenInclude(st => st.Teacher)
+                .Where(s => s.Date == dateOnly)
+                .Where(s => s.ScheduleGroups.Any(sg => sg.GroupId == groupId))
+                .OrderBy(s => s.Date)
+                .ThenBy(s => s.LessonId)
+                .ThenBy(s => s.Subgroup)
+                .ToListAsync();
+            
+            return schedules.Any() ? schedules : NotFound();
+        }
+        
+        [HttpGet("teacher-schedule/month")]
+        [SwaggerOperation(Summary = "Get teacher schedule for the month")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Month is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetMonthTeacherSchedules(
+            [SwaggerParameter(Description = "Teacher Id")][Required][FromQuery]int teacherId,
+            [SwaggerParameter(Description = "Number of month")][Required][FromQuery]int month)
+        {
+            if (month is < 1 or > 12)
+            {
+                return BadRequest();
+            }
+            
+            var schedules = await _context.Schedules
+                .Include(s => s.Classroom)
+                .Include(s => s.Discipline)
+                .Include(s => s.LessonTime)
+                .Include(s => s.ScheduleGroups)
+                .ThenInclude(sg => sg.Group)
+                .Include(s => s.ScheduleTeachers)
+                .ThenInclude(st => st.Teacher)
+                .Where(s => s.Date.Month == month)
+                .Where(s => s.ScheduleTeachers.Any(sg => sg.TeacherId == teacherId))
+                .OrderBy(s => s.Date)
+                .GroupBy(s => s.Date)
+                .ToListAsync();
+            
+            return schedules.Any()? Ok(
+                schedules.Select(d => new StudyDay
+                {
+                    Date = d.Key,
+                    Lessons = d
+                        .OrderBy(s => s.LessonId)
+                        .ThenBy(s => s.Subgroup)
+                        .ToList()   
+                })
+            ) : NotFound();
+        }
+        
+        [HttpGet("teacher-schedule/weekly")]
+        [SwaggerOperation(Summary = "Get teacher weekly schedule")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetWeeklyTeacherSchedules(
+            [SwaggerParameter(Description = "Teacher Id")][FromQuery][Required]int teacherId,
+            [SwaggerParameter(Description = "Start date of week in standard ISO 8601 YYYY-MM-DD")]
+            [FromQuery][Required]string startDateWeekString)
+        {
+            if (!DateOnly.TryParseExact(startDateWeekString, "yyyy-MM-dd", out var startDateWeek))
+            {
+                return BadRequest();   
+            }
+            
+            var schedules = await _context.Schedules
+             .Include(s => s.Classroom)
+             .Include(s => s.Discipline)
+             .Include(s => s.LessonTime)
+             .Include(s => s.ScheduleGroups)
+             .ThenInclude(sg => sg.Group)
+             .Include(s => s.ScheduleTeachers)
+             .ThenInclude(st => st.Teacher)
+             .Where(s => s.Date >= startDateWeek && s.Date <= startDateWeek.AddDays(6))
+             .Where(s => s.ScheduleTeachers.Any(sg => sg.TeacherId == teacherId))
+             .OrderBy(s => s.Date)
+             .GroupBy(s => s.Date)
+             .ToListAsync();
+    
+            return schedules.Any()? Ok(
+                schedules.Select(d => new StudyDay
+                    {
+                        Date = d.Key,
+                        Lessons = d
+                            .OrderBy(s => s.LessonId)
+                            .ThenBy(s => s.Subgroup)
+                            .ToList()   
+                    })
+                ) : NotFound();
+        }
+        
+        [HttpGet("teacher-schedule/day")]
+        [SwaggerOperation(Summary = "Get teacher daily schedule")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<Schedule>>> GetDayTeacherSchedules(
+            [SwaggerParameter(Description = "Teacher Id")][Required][FromQuery]int teacherId,
+            [SwaggerParameter(Description = "Date in standard ISO 8601 YYYY-MM-DD")][Required][FromQuery]string dateString)
+        {
+            if (!DateOnly.TryParseExact(dateString, "yyyy-MM-dd", out var dateOnly))
+            {
+                return BadRequest();   
+            }
+            
+            var schedules = await _context.Schedules
+                .Include(s => s.Classroom)
+                .Include(s => s.Discipline)
+                .Include(s => s.LessonTime)
+                .Include(s => s.ScheduleGroups)
+                .ThenInclude(sg => sg.Group)
+                .Include(s => s.ScheduleTeachers)
+                .ThenInclude(st => st.Teacher)
+                .Where(s => s.Date == dateOnly)
+                .Where(s => s.ScheduleTeachers.Any(sg => sg.TeacherId == teacherId))
+                .OrderBy(s => s.Date)
+                .ThenBy(s => s.LessonId)
+                .ThenBy(s => s.Subgroup)
+                .ToListAsync();
+            
+            return schedules.Any() ? schedules : NotFound();
+        }    
+        
+        [HttpGet("classroom-schedule/month")]
+        [SwaggerOperation(Summary = "Get classroom schedule for the month")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Month is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetMonthClassroomSchedules(
+            [SwaggerParameter(Description = "Classroom Id")][Required][FromQuery]int classroomId,
+            [SwaggerParameter(Description = "Number of month")][Required][FromQuery]int month)
+        {
+            if (month is < 1 or > 12)
+            {
+                return BadRequest();
+            }
+            
+            var schedules = await _context.Schedules
+                .Include(s => s.Classroom)
+                .Include(s => s.Discipline)
+                .Include(s => s.LessonTime)
+                .Include(s => s.ScheduleGroups)
+                .ThenInclude(sg => sg.Group)
+                .Include(s => s.ScheduleTeachers)
+                .ThenInclude(st => st.Teacher)
+                .Where(s => s.Date.Month == month)
+                .Where(s => s.ClassroomId != null && s.ClassroomId == classroomId)
+                .OrderBy(s => s.Date)
+                .GroupBy(s => s.Date)
+                .ToListAsync();
+            
+            return schedules.Any()? Ok(
+                schedules.Select(d => new StudyDay
+                {
+                    Date = d.Key,
+                    Lessons = d
+                        .OrderBy(s => s.LessonId)
+                        .ThenBy(s => s.Subgroup)
+                        .ToList()   
+                })
+            ) : NotFound();
+        }
+        
+        [HttpGet("classroom-schedule/weekly")]
+        [SwaggerOperation(Summary = "Get classroom weekly schedule")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetWeeklyClassroomSchedules(
+            [SwaggerParameter(Description = "Classroom Id")][FromQuery][Required]int classroomId,
+            [SwaggerParameter(Description = "Start date of week in standard ISO 8601 YYYY-MM-DD")]
+            [FromQuery][Required]string startDateWeekString)
+        {
+            if (!DateOnly.TryParseExact(startDateWeekString, "yyyy-MM-dd", out var startDateWeek))
+            {
+                return BadRequest();   
+            }
+            
+            var schedules = await _context.Schedules
+             .Include(s => s.Classroom)
+             .Include(s => s.Discipline)
+             .Include(s => s.LessonTime)
+             .Include(s => s.ScheduleGroups)
+             .ThenInclude(sg => sg.Group)
+             .Include(s => s.ScheduleTeachers)
+             .ThenInclude(st => st.Teacher)
+             .Where(s => s.Date >= startDateWeek && s.Date <= startDateWeek.AddDays(6))
+             .Where(s => s.ClassroomId != null && s.ClassroomId == classroomId)
+             .OrderBy(s => s.Date)
+             .GroupBy(s => s.Date)
+             .ToListAsync();
+    
+            return schedules.Any()? Ok(
+                schedules.Select(d => new StudyDay
+                    {
+                        Date = d.Key,
+                        Lessons = d
+                            .OrderBy(s => s.LessonId)
+                            .ThenBy(s => s.Subgroup)
+                            .ToList()   
+                    })
+                ) : NotFound();
+        }
+        
+        [HttpGet("classroom-schedule/day")]
+        [SwaggerOperation(Summary = "Get classroom daily schedule")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
+        public async Task<ActionResult<IEnumerable<Schedule>>> GetDayClassroomSchedules(
+            [SwaggerParameter(Description = "Classroom Id")][Required][FromQuery]int classroomId,
+            [SwaggerParameter(Description = "Date in standard ISO 8601 YYYY-MM-DD")][Required][FromQuery]string dateString)
+        {
+            if (!DateOnly.TryParseExact(dateString, "yyyy-MM-dd", out var dateOnly))
+            {
+                return BadRequest();   
+            }
+            
+            var schedules = await _context.Schedules
+                .Include(s => s.Classroom)
+                .Include(s => s.Discipline)
+                .Include(s => s.LessonTime)
+                .Include(s => s.ScheduleGroups)
+                .ThenInclude(sg => sg.Group)
+                .Include(s => s.ScheduleTeachers)
+                .ThenInclude(st => st.Teacher)
+                .Where(s => s.Date == dateOnly)
+                .Where(s => s.ClassroomId != null && s.ClassroomId == classroomId)
+                .OrderBy(s => s.Date)
+                .ThenBy(s => s.LessonId)
+                .ThenBy(s => s.Subgroup)
+                .ToListAsync();
+            
+            return schedules.Any() ? schedules : NotFound();
         }
     }
 }

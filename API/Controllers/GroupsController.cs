@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.DataBase.Context;
 using API.DataBase.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Produces("application/json")]
+    [Route("schedule-api/groups")]
     [ApiController]
     public class GroupsController : ControllerBase
     {
@@ -21,20 +17,38 @@ namespace API.Controllers
         {
             _context = context;
         }
-
-        // GET: api/Groups
+        
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Group>>> GetGroups()
+        [SwaggerOperation(Summary = "Get list of groups")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of groups")]
+        public async Task<ActionResult<IEnumerable<Group>>> GetGroups(
+            [SwaggerParameter(Required = false, Description = "Institute id")]int? instituteId)
         {
-            return await _context.Groups.Include(g => g.Institute).ToListAsync();
+            return instituteId switch
+            {
+                null => await _context.Groups
+                    .OrderBy(g => g.InstituteId)
+                    .ThenBy(g => g.Name)
+                    .ToListAsync(),
+                _ => await _context.Groups
+                    .Where(g => g.InstituteId == instituteId)
+                    .OrderBy(g => g.Course)
+                    .ThenBy(g => g.Name)
+                    .ToListAsync()
+            };
         }
-
-        // GET: api/Groups/5
+        
         [HttpGet("{id}")]
-        public async Task<IEnumerable<Group>> GetGroupsByInstituteId(int id)
+        [SwaggerOperation(Summary = "Get group by id")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received group")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Group not found")]
+        public async Task<ActionResult<Group>> GetGroup(
+            [SwaggerParameter(Description = "Group id")]int id)
         {
-            var groups = await _context.Groups.ToListAsync();
-            return groups.Where(group => group.InstituteId == id);
+            var group = await _context.Groups
+                .Include(g => g.Institute)
+                .FirstOrDefaultAsync(g => g.GroupId == id);
+            return group == null ? NotFound() : group;
         }
     }
 }

@@ -66,7 +66,8 @@ public partial class ScheduleContext : DbContext
             entity.Property(e => e.InstituteId).HasColumnName("institute_id");
             entity.Property(e => e.Name).HasColumnName("name");
 
-            entity.HasOne(d => d.Institute).WithMany(p => p.Groups)
+            entity.HasOne(d => d.Institute)
+                .WithMany(p => p.Groups)
                 .HasForeignKey(d => d.InstituteId)
                 .HasConstraintName("institute_id");
         });
@@ -149,15 +150,18 @@ public partial class ScheduleContext : DbContext
             entity.Property(e => e.Subgroup).HasColumnName("subgroup");
             entity.Property(e => e.TeachersVerbose).HasColumnName("teachers_verbose");
 
-            entity.HasOne(d => d.Classroom).WithMany(p => p.Schedules)
+            entity.HasOne(d => d.Classroom)
+                .WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.ClassroomId)
                 .HasConstraintName("schedule_classrooms_null_fk");
 
-            entity.HasOne(d => d.Discipline).WithMany(p => p.Schedules)
+            entity.HasOne(d => d.Discipline)
+                .WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.DisciplineId)
                 .HasConstraintName("discipline_fk");
 
-            entity.HasOne(d => d.Lesson).WithMany(p => p.Schedules)
+            entity.HasOne(d => d.LessonTime)
+                .WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.LessonId)
                 .HasConstraintName("lesson_time_fk");
         });
