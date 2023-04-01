@@ -53,8 +53,15 @@ namespace API.Controllers
                     Date = d.Key,
                     Lessons = d
                         .OrderBy(s => s.LessonId)
-                        .ThenBy(s => s.Subgroup)
-                        .ToList()   
+                        .GroupBy(s => s.LessonTime)
+                        .Select(l => new Lesson
+                        {
+                            Time = l.Key!,
+                            Schedules = l
+                                .OrderBy(s => s.Subgroup)
+                                .ToList()
+                        })
+                        .ToList()
                 })
             ) : NotFound();
         }
@@ -94,8 +101,15 @@ namespace API.Controllers
                         Date = d.Key,
                         Lessons = d
                             .OrderBy(s => s.LessonId)
-                            .ThenBy(s => s.Subgroup)
-                            .ToList()   
+                            .GroupBy(s => s.LessonTime)
+                            .Select(l => new Lesson
+                            {
+                                Time = l.Key!,
+                                Schedules = l
+                                    .OrderBy(s => s.Subgroup)
+                                    .ToList()
+                            })
+                            .ToList()
                     })
                 ) : NotFound();
         }
@@ -105,7 +119,7 @@ namespace API.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetDayGroupSchedules(
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetDayGroupSchedules(
             [SwaggerParameter(Description = "Group Id")][Required][FromQuery]int groupId,
             [SwaggerParameter(Description = "Date in standard ISO 8601 YYYY-MM-DD")][Required][FromQuery]string dateString)
         {
@@ -125,11 +139,26 @@ namespace API.Controllers
                 .Where(s => s.Date == dateOnly)
                 .Where(s => s.ScheduleGroups.Any(sg => sg.GroupId == groupId))
                 .OrderBy(s => s.Date)
-                .ThenBy(s => s.LessonId)
-                .ThenBy(s => s.Subgroup)
+                .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any() ? schedules : NotFound();
+            return schedules.Any() ? Ok(
+                schedules.Select(d => new StudyDay
+                {
+                    Date = d.Key,
+                    Lessons = d
+                        .OrderBy(s => s.LessonId)
+                        .GroupBy(s => s.LessonTime)
+                        .Select(l => new Lesson
+                        {
+                            Time = l.Key!,
+                            Schedules = l
+                                .OrderBy(s => s.Subgroup)
+                                .ToList()
+                        })
+                        .ToList()
+                })
+            ) : NotFound();
         }
         
         [HttpGet("teacher-schedule/month")]
@@ -166,7 +195,14 @@ namespace API.Controllers
                     Date = d.Key,
                     Lessons = d
                         .OrderBy(s => s.LessonId)
-                        .ThenBy(s => s.Subgroup)
+                        .GroupBy(s => s.LessonTime)
+                        .Select(l => new Lesson
+                        {
+                            Time = l.Key!,
+                            Schedules = l
+                                .OrderBy(s => s.Subgroup)
+                                .ToList()
+                        })
                         .ToList()   
                 })
             ) : NotFound();
@@ -207,7 +243,14 @@ namespace API.Controllers
                         Date = d.Key,
                         Lessons = d
                             .OrderBy(s => s.LessonId)
-                            .ThenBy(s => s.Subgroup)
+                            .GroupBy(s => s.LessonTime)
+                            .Select(l => new Lesson
+                            {
+                                Time = l.Key!,
+                                Schedules = l
+                                    .OrderBy(s => s.Subgroup)
+                                    .ToList()
+                            })
                             .ToList()   
                     })
                 ) : NotFound();
@@ -218,7 +261,7 @@ namespace API.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetDayTeacherSchedules(
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetDayTeacherSchedules(
             [SwaggerParameter(Description = "Teacher Id")][Required][FromQuery]int teacherId,
             [SwaggerParameter(Description = "Date in standard ISO 8601 YYYY-MM-DD")][Required][FromQuery]string dateString)
         {
@@ -238,11 +281,26 @@ namespace API.Controllers
                 .Where(s => s.Date == dateOnly)
                 .Where(s => s.ScheduleTeachers.Any(sg => sg.TeacherId == teacherId))
                 .OrderBy(s => s.Date)
-                .ThenBy(s => s.LessonId)
-                .ThenBy(s => s.Subgroup)
+                .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any() ? schedules : NotFound();
+            return schedules.Any() ? Ok(
+                schedules.Select(d => new StudyDay
+                {
+                    Date = d.Key,
+                    Lessons = d
+                        .OrderBy(s => s.LessonId)
+                        .GroupBy(s => s.LessonTime)
+                        .Select(l => new Lesson
+                        {
+                            Time = l.Key!,
+                            Schedules = l
+                                .OrderBy(s => s.Subgroup)
+                                .ToList()
+                        })
+                        .ToList()   
+                })
+            ) : NotFound();
         }    
         
         [HttpGet("classroom-schedule/month")]
@@ -279,7 +337,14 @@ namespace API.Controllers
                     Date = d.Key,
                     Lessons = d
                         .OrderBy(s => s.LessonId)
-                        .ThenBy(s => s.Subgroup)
+                        .GroupBy(s => s.LessonTime)
+                        .Select(l => new Lesson
+                        {
+                            Time = l.Key!,
+                            Schedules = l
+                                .OrderBy(s => s.Subgroup)
+                                .ToList()
+                        })
                         .ToList()   
                 })
             ) : NotFound();
@@ -320,7 +385,14 @@ namespace API.Controllers
                         Date = d.Key,
                         Lessons = d
                             .OrderBy(s => s.LessonId)
-                            .ThenBy(s => s.Subgroup)
+                            .GroupBy(s => s.LessonTime)
+                            .Select(l => new Lesson
+                            {
+                                Time = l.Key!,
+                                Schedules = l
+                                    .OrderBy(s => s.Subgroup)
+                                    .ToList()
+                            })
                             .ToList()   
                     })
                 ) : NotFound();
@@ -331,7 +403,7 @@ namespace API.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of schedule")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Date is incorrect")]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Schedule not found")]
-        public async Task<ActionResult<IEnumerable<Schedule>>> GetDayClassroomSchedules(
+        public async Task<ActionResult<IEnumerable<StudyDay>>> GetDayClassroomSchedules(
             [SwaggerParameter(Description = "Classroom Id")][Required][FromQuery]int classroomId,
             [SwaggerParameter(Description = "Date in standard ISO 8601 YYYY-MM-DD")][Required][FromQuery]string dateString)
         {
@@ -351,11 +423,26 @@ namespace API.Controllers
                 .Where(s => s.Date == dateOnly)
                 .Where(s => s.ClassroomId != null && s.ClassroomId == classroomId)
                 .OrderBy(s => s.Date)
-                .ThenBy(s => s.LessonId)
-                .ThenBy(s => s.Subgroup)
+                .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any() ? schedules : NotFound();
+            return schedules.Any() ? Ok(
+                schedules.Select(d => new StudyDay
+                {
+                    Date = d.Key,
+                    Lessons = d
+                        .OrderBy(s => s.LessonId)
+                        .GroupBy(s => s.LessonTime)
+                        .Select(l => new Lesson
+                        {
+                            Time = l.Key!,
+                            Schedules = l
+                                .OrderBy(s => s.Subgroup)
+                                .ToList()
+                        })
+                        .ToList()   
+                })
+            ) : NotFound();
         }
     }
 }

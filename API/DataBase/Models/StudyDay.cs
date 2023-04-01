@@ -9,5 +9,5 @@ public partial class StudyDay
     public DateOnly Date { get; set; }
     
     [SwaggerSchema(Description = "list of lessons in study day")]
-    public virtual ICollection<Schedule> Lessons { get; set; }
+    public virtual ICollection<Lesson> Lessons { get; set; }
 }
