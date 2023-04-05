@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.DataBase.Context;
@@ -46,24 +47,11 @@ namespace API.Controllers
                 .OrderBy(s => s.Date)
                 .GroupBy(s => s.Date)
                 .ToListAsync();
+
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
             
-            return schedules.Any()? Ok(
-                schedules.Select(d => new StudyDay
-                {
-                    Date = d.Key,
-                    Lessons = d
-                        .OrderBy(s => s.LessonId)
-                        .GroupBy(s => s.LessonTime)
-                        .Select(l => new Lesson
-                        {
-                            Time = l.Key!,
-                            Schedules = l
-                                .OrderBy(s => s.Subgroup)
-                                .ToList()
-                        })
-                        .ToList()
-                })
-            ) : NotFound();
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("group-schedule/weekly")]
@@ -94,24 +82,11 @@ namespace API.Controllers
              .OrderBy(s => s.Date)
              .GroupBy(s => s.Date)
              .ToListAsync();
-    
-            return schedules.Any()? Ok(
-                schedules.Select(d => new StudyDay
-                    {
-                        Date = d.Key,
-                        Lessons = d
-                            .OrderBy(s => s.LessonId)
-                            .GroupBy(s => s.LessonTime)
-                            .Select(l => new Lesson
-                            {
-                                Time = l.Key!,
-                                Schedules = l
-                                    .OrderBy(s => s.Subgroup)
-                                    .ToList()
-                            })
-                            .ToList()
-                    })
-                ) : NotFound();
+
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("group-schedule/day")]
@@ -141,24 +116,11 @@ namespace API.Controllers
                 .OrderBy(s => s.Date)
                 .GroupBy(s => s.Date)
                 .ToListAsync();
+
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
             
-            return schedules.Any() ? Ok(
-                schedules.Select(d => new StudyDay
-                {
-                    Date = d.Key,
-                    Lessons = d
-                        .OrderBy(s => s.LessonId)
-                        .GroupBy(s => s.LessonTime)
-                        .Select(l => new Lesson
-                        {
-                            Time = l.Key!,
-                            Schedules = l
-                                .OrderBy(s => s.Subgroup)
-                                .ToList()
-                        })
-                        .ToList()
-                })
-            ) : NotFound();
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("teacher-schedule/month")]
@@ -189,23 +151,10 @@ namespace API.Controllers
                 .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any()? Ok(
-                schedules.Select(d => new StudyDay
-                {
-                    Date = d.Key,
-                    Lessons = d
-                        .OrderBy(s => s.LessonId)
-                        .GroupBy(s => s.LessonTime)
-                        .Select(l => new Lesson
-                        {
-                            Time = l.Key!,
-                            Schedules = l
-                                .OrderBy(s => s.Subgroup)
-                                .ToList()
-                        })
-                        .ToList()   
-                })
-            ) : NotFound();
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("teacher-schedule/weekly")]
@@ -237,23 +186,10 @@ namespace API.Controllers
              .GroupBy(s => s.Date)
              .ToListAsync();
     
-            return schedules.Any()? Ok(
-                schedules.Select(d => new StudyDay
-                    {
-                        Date = d.Key,
-                        Lessons = d
-                            .OrderBy(s => s.LessonId)
-                            .GroupBy(s => s.LessonTime)
-                            .Select(l => new Lesson
-                            {
-                                Time = l.Key!,
-                                Schedules = l
-                                    .OrderBy(s => s.Subgroup)
-                                    .ToList()
-                            })
-                            .ToList()   
-                    })
-                ) : NotFound();
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("teacher-schedule/day")]
@@ -284,23 +220,10 @@ namespace API.Controllers
                 .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any() ? Ok(
-                schedules.Select(d => new StudyDay
-                {
-                    Date = d.Key,
-                    Lessons = d
-                        .OrderBy(s => s.LessonId)
-                        .GroupBy(s => s.LessonTime)
-                        .Select(l => new Lesson
-                        {
-                            Time = l.Key!,
-                            Schedules = l
-                                .OrderBy(s => s.Subgroup)
-                                .ToList()
-                        })
-                        .ToList()   
-                })
-            ) : NotFound();
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
         }    
         
         [HttpGet("classroom-schedule/month")]
@@ -331,23 +254,10 @@ namespace API.Controllers
                 .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any()? Ok(
-                schedules.Select(d => new StudyDay
-                {
-                    Date = d.Key,
-                    Lessons = d
-                        .OrderBy(s => s.LessonId)
-                        .GroupBy(s => s.LessonTime)
-                        .Select(l => new Lesson
-                        {
-                            Time = l.Key!,
-                            Schedules = l
-                                .OrderBy(s => s.Subgroup)
-                                .ToList()
-                        })
-                        .ToList()   
-                })
-            ) : NotFound();
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("classroom-schedule/weekly")]
@@ -379,23 +289,10 @@ namespace API.Controllers
              .GroupBy(s => s.Date)
              .ToListAsync();
     
-            return schedules.Any()? Ok(
-                schedules.Select(d => new StudyDay
-                    {
-                        Date = d.Key,
-                        Lessons = d
-                            .OrderBy(s => s.LessonId)
-                            .GroupBy(s => s.LessonTime)
-                            .Select(l => new Lesson
-                            {
-                                Time = l.Key!,
-                                Schedules = l
-                                    .OrderBy(s => s.Subgroup)
-                                    .ToList()
-                            })
-                            .ToList()   
-                    })
-                ) : NotFound();
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
         }
         
         [HttpGet("classroom-schedule/day")]
@@ -426,8 +323,16 @@ namespace API.Controllers
                 .GroupBy(s => s.Date)
                 .ToListAsync();
             
-            return schedules.Any() ? Ok(
-                schedules.Select(d => new StudyDay
+            var studDays = GroupSchedule(schedules);
+            CalculateTimeBreak(studDays);
+            
+            return studDays.Any()? Ok(studDays) : NotFound();
+        }
+        
+        private static List<StudyDay> GroupSchedule(IEnumerable<IGrouping<DateOnly, Schedule>> schedules)
+        {
+            return schedules
+                .Select(d => new StudyDay
                 {
                     Date = d.Key,
                     Lessons = d
@@ -440,9 +345,34 @@ namespace API.Controllers
                                 .OrderBy(s => s.Subgroup)
                                 .ToList()
                         })
-                        .ToList()   
+                        .ToList()
                 })
-            ) : NotFound();
+                .ToList();
+        }
+        
+        private static void CalculateTimeBreak(List<StudyDay> studDays)
+        {
+            studDays.ForEach(d => d.Lessons
+                .Select((value, i) => new
+                {
+                    Value = value,
+                    Index = i
+                })
+                .ToList()
+                .ForEach(obj =>
+                {
+                    var endTime = TimeOnly.ParseExact(obj.Value.Time.Endtime!, "H:mm", CultureInfo.InvariantCulture);
+                    var begTime = endTime;
+                    var lesson = d.Lessons.ElementAtOrDefault(obj.Index + 1);
+                    if (lesson != null)
+                    {
+                        begTime = TimeOnly.ParseExact(lesson.Time.Begtime!, "H:mm", CultureInfo.InvariantCulture);
+                    }
+
+                    var breakTime = begTime - endTime;
+                    obj.Value.BreakTimeAfter = breakTime.TotalMinutes > 15 ? breakTime : null;
+                })
+            );
         }
     }
 }
