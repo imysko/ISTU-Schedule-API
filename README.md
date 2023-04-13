@@ -8,15 +8,16 @@
 - you need to create appsettings.json and add a connections settings to postgresql and telegram api in getting-service: [example app settings](getting-service/appsettings.json.example)
 ```json
 "ConnectionStrings": {
-  "ScheduleDB": "Host=<host>;Port=<>port;Database=<database>;Username=<user>;Password=<password>",
+  "ScheduleDB": "Host=<host>;Port=<port>;Database=<database>;Username=<user>;Password=<password>",
   "TelegramApiId": "<id>",
   "TelegramApiHash": "<hash>",
   "TelegramPhoneNumber": "<phone_number>"
+  "ChatBotId": "<chat_id>"
 }
 ```
 - you need to to create appsettings.json add a connections settings to postgresql in API: [app settings](API/appsettings.json.example)
 ```json
 "ConnectionStrings": {
-  "ScheduleDB": "Host=<host>;Port=<>port;Database=<database>;Username=<user>;Password=<password>",
+  "ScheduleDB": "Host=<host>;Port=<port>;Database=<database>;Username=<user>;Password=<password>",
 }
 ```

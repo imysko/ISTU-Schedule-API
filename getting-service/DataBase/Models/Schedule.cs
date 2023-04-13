@@ -1,44 +1,41 @@
-﻿using Newtonsoft.Json;
+﻿using getting_service.DataBase.enums;
+using Newtonsoft.Json;
 
 namespace getting_service.DataBase.Models;
 
 public partial class Schedule
 {
-    [JsonProperty("schedule_id")]
     public int ScheduleId { get; set; }
 
-    [JsonProperty("groups_verbose")]
     public string? GroupsVerbose { get; set; }
 
-    [JsonProperty("teachers_verbose")]
     public string? TeachersVerbose { get; set; }
-
+    
     public int? ClassroomId { get; set; }
 
-    [JsonProperty("auditories_verbose")]
     public string? ClassroomVerbose { get; set; }
 
-    [JsonProperty("discipline_id")]
     public int? DisciplineId { get; set; }
     
-    [JsonProperty("discipline_verbose")]
     public string? DisciplineVerbose { get; set; }
     
-    [JsonProperty("lesson_id")]
+    public int? OtherDisciplineId { get; set; }
+    
     public int? LessonId { get; set; }
     
-    [JsonProperty("subgroup")]
-    public int? Subgroup { get; set; }
+    public Subgroup? Subgroup { get; set; }
     
-    [JsonProperty("lesson_type")]
-    public int? LessonType { get; set; }
+    public LessonType? LessonType { get; set; }
     
-    [JsonProperty("date")]
+    public string? ScheduleType { get; set; }
+    
     public DateOnly? Date { get; set; }
 
     public virtual Classroom? Classroom { get; set; }
     
     public virtual Discipline? Discipline { get; set; }
+
+    public virtual OtherDiscipline? OtherDiscipline { get; set; }
 
     public virtual LessonsTime? LessonTime { get; set; }
     

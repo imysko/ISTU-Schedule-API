@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using getting_service.DataBase.enums;
+using Newtonsoft.Json;
 
 namespace getting_service.DataBase.Models;
 
-public class ScheduleViewModel
+public class ScheduleResponse
 {
     [JsonProperty("schedule_id")]
     public int ScheduleId { get; set; }
@@ -31,15 +32,21 @@ public class ScheduleViewModel
     [JsonProperty("discipline_verbose")]
     public string? DisciplineVerbose { get; set; }
     
+    [JsonProperty("other_discipline")]
+    public int? OtherDisciplineId { get; set; }
+    
     [JsonProperty("lesson_id")]
     public int? LessonId { get; set; }
     
     [JsonProperty("subgroup")]
-    public int? Subgroup { get; set; }
+    public Subgroup? Subgroup { get; set; }
     
     [JsonProperty("lesson_type")]
-    public int? LessonType { get; set; }
-    
+    public LessonType? LessonType { get; set; }
+
+    [JsonProperty("schedule_type")]
+    public string? ScheduleType { get; set; }
+
     [JsonProperty("date")]
     public string Date { get; set; }
 }

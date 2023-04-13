@@ -73,10 +73,18 @@ public class ScheduleDbController
                 );
                 break;
             }
+            case "other_disciplines":
+            {
+                await CallTaskWithLogging(
+                    async () => await PutOtherDisciplines(response[key]!.ToObject<List<OtherDiscipline>>()!),
+                    "Other Disciplines"
+                );
+                break;
+            }
             case "schedule":
             {
                 await CallTaskWithLogging(
-                    async () => await PutSchedule(response[key]!.ToObject<List<ScheduleViewModel>>()!),
+                    async () => await PutSchedule(response[key]!.ToObject<List<ScheduleResponse>>()!),
                     "Schedule"
                 );
                 break;
@@ -251,14 +259,43 @@ public class ScheduleDbController
 
         return Task.CompletedTask;
     }
+    
+    private Task PutOtherDisciplines(List<OtherDiscipline> list)
+    {
+        lock (_lock)
+        {
+            var existingOtherDisciplinesById = _context.OtherDisciplines.ToDictionary(o => o.OtherDisciplineId);
 
-    private Task PutSchedule(List<ScheduleViewModel> list)
+            var newOtherDisciplines = new List<OtherDiscipline>();
+            foreach (var otherDiscipline in list)
+            {
+                if (existingOtherDisciplinesById.TryGetValue(otherDiscipline.OtherDisciplineId, out var existingDiscipline))
+                {
+                    _context.Entry(existingDiscipline).CurrentValues.SetValues(otherDiscipline);
+                }
+                else
+                {
+                    newOtherDisciplines.Add(otherDiscipline);
+                }
+            }
+
+            _context.OtherDisciplines.AddRange(newOtherDisciplines);
+            _context.OtherDisciplines.UpdateRange(existingOtherDisciplinesById.Values.Except(newOtherDisciplines));
+
+            _context.SaveChanges();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task PutSchedule(List<ScheduleResponse> list)
     {
         lock (_lock)
         {
             var existingSchedules = _context.Schedules.ToList();
             var existingClassrooms = _context.Classrooms.ToList();
             var existingDisciplines = _context.Disciplines.ToList();
+            var existingOtherDisciplines = _context.OtherDisciplines.ToList();
             var existingGroups = _context.Groups.ToList();
             var existingTeachers = _context.Teachers.ToList();
             var existingLessonsTimes = _context.LessonsTimes.ToList();
@@ -324,9 +361,13 @@ public class ScheduleDbController
                         existingDisciplines.FirstOrDefault(d => d.DisciplineId == el.DisciplineId)?.DisciplineId ??
                         null,
                     DisciplineVerbose = el.DisciplineVerbose,
+                    OtherDisciplineId = 
+                        existingOtherDisciplines.FirstOrDefault(o => o.OtherDisciplineId == el.OtherDisciplineId)?
+                            .OtherDisciplineId ?? null,
                     LessonId = existingLessonsTimes.FirstOrDefault(l => l.LessonId == el.LessonId)?.LessonId ?? null,
                     Subgroup = el.Subgroup,
                     LessonType = el.LessonType,
+                    ScheduleType = el.ScheduleType,
                     Date = DateOnly.ParseExact(el.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture)
                 };
 
