@@ -15,7 +15,10 @@ public class UpdateDate
     public DateOnly Teachers { get; set; }
     
     [JsonConverter(typeof(DateOnlyJsonConverter))]
-    public DateOnly LessonsNames { get; set; }
+    public DateOnly Disciplines { get; set; }
+    
+    [JsonConverter(typeof(DateOnlyJsonConverter))]
+    public DateOnly OtherDisciplines { get; set; }
     
     [JsonConverter(typeof(DateOnlyJsonConverter))]
     public DateOnly Classrooms { get; set; }
@@ -24,5 +27,5 @@ public class UpdateDate
     public DateOnly ScheduleTwoWeeks { get; set; }
     
     [JsonConverter(typeof(DateOnlyJsonConverter))]
-    public DateOnly ScheduleHalfYear { get; set; }
+    public DateOnly ScheduleThreeMonths { get; set; }
 }

@@ -20,3 +20,5 @@ services:
         max-size: "200M"
         max-file: "4"
     restart: always
+    stdin_open: true
+    tty: true

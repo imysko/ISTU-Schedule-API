@@ -1,1 +1,10 @@
-{"Institutes":"2023-05-05","Groups":"2023-05-05","Teachers":"2023-05-05","LessonsNames":"2023-05-05","Classrooms":"2023-05-05","ScheduleTwoWeeks":"2023-04-15","ScheduleHalfYear":"2023-05-05"}
+{
+  "Institutes": "2023-03-05",
+  "Groups": "2023-03-05",
+  "Teachers": "2023-03-05",
+  "Disciplines": "2023-03-05",
+  "OtherDisciplines": "2023-03-05",
+  "Classrooms": "2023-03-05",
+  "ScheduleTwoWeeks":"2023-03-15",
+  "ScheduleThreeMonths": "2023-03-05"
+}

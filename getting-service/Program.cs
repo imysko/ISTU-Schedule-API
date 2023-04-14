@@ -240,24 +240,36 @@ internal static class Program
             {           
                 await GetTeachers();
             }
-            if (_updateDate.LessonsNames <= today)
+            if (_updateDate.Disciplines <= today)
             {
-                await GetLessonsNames();
+                await GetDisciplines();
+            }
+            if (_updateDate.OtherDisciplines <= today)
+            {
+                await GetOtherDisciplines();
             }
             if (_updateDate.Classrooms <= today)
             {
                 await GetClassrooms();
             }
-            if (_updateDate.ScheduleHalfYear <= today)
+            if (_updateDate.ScheduleThreeMonths <= today)
             {
-                await GetScheduleHalfYear();
+                await GetScheduleThreeMonths();
             }
-            else if (_updateDate.ScheduleTwoWeeks <= today)
+            if (_updateDate.ScheduleTwoWeeks <= today)
             {
                 await GetScheduleTwoWeeks();
             }
             
-            await using (var createStream = File.Open($"{RootPath}\\getting-service\\updatedates.json", FileMode.Create))
+            
+            // To launch without a docker
+            // await using (var createStream = File.Open($"{RootPath}\\getting-service\\updatedates.json", FileMode.Create))
+            // {
+            //     await JsonSerializer.SerializeAsync(createStream, _updateDate);
+            // }
+        
+            // To launch with a docker
+            await using (var createStream = File.Open($"{RootPath}updatedates.json", FileMode.Create))
             {
                 await JsonSerializer.SerializeAsync(createStream, _updateDate);
             }
@@ -270,7 +282,12 @@ internal static class Program
 
     private static async Task LoadJson()
     {
-        using var r = new StreamReader($"{RootPath}\\getting-service\\updatedates.json");
+        // To launch without a docker
+        // using var r = new StreamReader($"{RootPath}\\getting-service\\updatedates.json"); 
+        
+        // To launch with a docker
+        using var r = new StreamReader($"{RootPath}updatedates.json");
+        
         var json = await r.ReadToEndAsync();
         
         _updateDate = JsonConvert.DeserializeObject<UpdateDate>(json) ?? new UpdateDate();
@@ -294,10 +311,16 @@ internal static class Program
         _updateDate.Teachers = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
     }
     
-    private static async Task GetLessonsNames()
+    private static async Task GetDisciplines()
     {
-        await SendMessageToBot("/api/lessons_names");
-        _updateDate.LessonsNames = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+        await SendMessageToBot("/api/disciplines");
+        _updateDate.Disciplines = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+    }
+    
+    private static async Task GetOtherDisciplines()
+    {
+        await SendMessageToBot("/api/other_disciplines");
+        _updateDate.OtherDisciplines = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
     }
     
     private static async Task GetClassrooms()
@@ -312,9 +335,14 @@ internal static class Program
         _updateDate.ScheduleTwoWeeks = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
     }
     
-    private static async Task GetScheduleHalfYear()
+    private static async Task GetScheduleThreeMonths()
     {
-        await SendMessageToBot("/api/schedule/months?count=3");
-        _updateDate.ScheduleHalfYear = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
+        var date = DateOnly.FromDateTime(DateTime.Now);
+        await SendMessageToBot($"/api/schedule/month?date={date.Year}-{date.Month}");
+        date = date.AddMonths(1);
+        await SendMessageToBot($"/api/schedule/month?date={date.Year}-{date.Month}");
+        date = date.AddMonths(1);
+        await SendMessageToBot($"/api/schedule/month?date={date.Year}-{date.Month}");
+        _updateDate.ScheduleThreeMonths = DateOnly.FromDateTime(DateTime.Now).AddMonths(1);
     }
 }
