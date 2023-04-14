@@ -1,8 +1,8 @@
-﻿using getting_service.DataBase.Context;
+﻿using getting_service.Controllers;
+using getting_service.Data.Models;
+using getting_service.DataBase.Context;
 using TdLib.Bindings;
 using TdLib;
-using getting_service.DataBase.Controllers;
-using getting_service.DataBase.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;

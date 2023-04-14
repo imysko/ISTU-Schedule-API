@@ -15,7 +15,7 @@
   "ChatBotId": "<chat_id>"
 }
 ```
-- you need to to create appsettings.json add a connections settings to postgresql in API: [app settings](API/appsettings.json.example)
+- you need to to create appsettings.json add a connections settings to postgresql in API: [example app settings](API/appsettings.json.example)
 ```json
 "ConnectionStrings": {
   "ScheduleDB": "Host=<host>;Port=<port>;Database=<database>;Username=<user>;Password=<password>",

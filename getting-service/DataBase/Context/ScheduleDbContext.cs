@@ -71,8 +71,8 @@ public partial class ScheduleDbContext : DbContext
 
             entity.Property(e => e.OtherDisciplineId).HasColumnName("other_discipline_id");
             entity.Property(e => e.DisciplineTitle).HasColumnName("discipline_title");
-            entity.Property(e => e.OtherDisciplineId).HasColumnName("is_online");
-            entity.Property(e => e.OtherDisciplineId).HasColumnName("type");
+            entity.Property(e => e.IsOnline).HasColumnName("is_online");
+            entity.Property(e => e.Type).HasColumnName("type");
         });
 
         modelBuilder.Entity<Group>(entity =>

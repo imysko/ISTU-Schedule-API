@@ -11,6 +11,7 @@ services:
     restart: always
     ports:
       - "7013:80"
+
   getting-service:
     container_name: getting-service
     build: getting-service

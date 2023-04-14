@@ -1,3 +1,4 @@
+using getting_service.Data.Enums;
 using Newtonsoft.Json;
 
 namespace getting_service.DataBase.Models;

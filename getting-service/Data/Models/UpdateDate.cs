@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using getting_service.Utils;
+using Newtonsoft.Json;
 
-namespace getting_service.DataBase.Models;
+namespace getting_service.Data.Models;
 
 public class UpdateDate
 {

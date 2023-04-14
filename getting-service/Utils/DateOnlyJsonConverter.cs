@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
-namespace getting_service;
+namespace getting_service.Utils;
 
 public class DateOnlyJsonConverter : JsonConverter<DateOnly>
 {

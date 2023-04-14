@@ -1,4 +1,4 @@
-namespace getting_service.DataBase.enums;
+namespace getting_service.Data.Enums;
 
 public enum Subgroup
 {

@@ -1,10 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System.Globalization;
+using getting_service.Data.Enums;
+using getting_service.Data.Models;
 using getting_service.DataBase.Context;
 using getting_service.DataBase.Models;
 using Newtonsoft.Json.Linq;
 
-namespace getting_service.DataBase.Controllers;
+namespace getting_service.Controllers;
 
 public class ScheduleDbController
 {
@@ -366,7 +367,9 @@ public class ScheduleDbController
                             .OtherDisciplineId ?? null,
                     LessonId = existingLessonsTimes.FirstOrDefault(l => l.LessonId == el.LessonId)?.LessonId ?? null,
                     Subgroup = el.Subgroup,
-                    LessonType = el.LessonType,
+                    LessonType = el.LessonType != LessonType.Unknown ? el.LessonType : 
+                        existingOtherDisciplines.FirstOrDefault(o => o.OtherDisciplineId == el.OtherDisciplineId)?
+                            .Type == OtherDisciplineType.Project ? LessonType.Project : LessonType.Unknown,
                     ScheduleType = el.ScheduleType,
                     Date = DateOnly.ParseExact(el.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture)
                 };

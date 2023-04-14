@@ -1,4 +1,4 @@
-namespace getting_service.DataBase;
+namespace getting_service.Data.Enums;
 
 public enum LessonType
 {
