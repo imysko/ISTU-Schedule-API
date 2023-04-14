@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
+﻿using API.Data.Enums;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.DataBase.Models;
 
@@ -25,15 +26,21 @@ public partial class Schedule
 
     [SwaggerSchema(Description = "text description of discipline")]
     public string? DisciplineVerbose { get; set; }
+    
+    [SwaggerSchema(Description = "other discipline Id")]
+    public int? OtherDisciplineId { get; set; }
 
     [SwaggerSchema(Description = "lesson time Id")]
     public int? LessonId { get; set; }
 
     [SwaggerSchema(Description = "number of the subgroup")]
-    public int? Subgroup { get; set; }
+    public Subgroup? Subgroup { get; set; }
 
     [SwaggerSchema(Description = "type of the lesson")]
-    public int? LessonType { get; set; }
+    public LessonType? LessonType { get; set; }
+    
+    [SwaggerSchema(Description = "type of the schedule")]
+    public string? ScheduleType { get; set; }
 
     [SwaggerSchema(Description = "date of the lesson")]
     public DateOnly Date { get; set; }
@@ -43,6 +50,9 @@ public partial class Schedule
 
     [SwaggerSchema(Description = "information about discipline")]
     public virtual Discipline? Discipline { get; set; }
+    
+    [SwaggerSchema(Description = "information about other discipline")]
+    public virtual OtherDiscipline? OtherDiscipline { get; set; }
 
     [SwaggerSchema(Description = "information about lesson time")]
     public virtual LessonsTime? LessonTime { get; set; }

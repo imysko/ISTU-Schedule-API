@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using API.Data.Enums;
+using API.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.DataBase.Context;
@@ -19,6 +21,19 @@ namespace API.Controllers
         {
             _context = context;
         }
+        
+        [HttpGet("lesson-types")]
+        [SwaggerOperation(Summary = "Get list of lesson types")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "Received list of lesson types")]
+        public IEnumerable<LessonTypeResponse> GetInstitutes()
+        {
+            return Enum.GetValues(typeof(LessonType)).Cast<LessonType>()
+                .Select(lt => new LessonTypeResponse
+                {
+                    Key = Convert.ToInt32(lt),
+                    Name = lt.ToString()
+                });
+        }
 
         [HttpGet("group-schedule/month")]
         [SwaggerOperation(Summary = "Get group schedule for the month")]
@@ -37,6 +52,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
                 .Include(s => s.Classroom)
                 .Include(s => s.Discipline)
+                .Include(s => s.OtherDiscipline)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -72,6 +88,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
              .Include(s => s.Classroom)
              .Include(s => s.Discipline)
+             .Include(s => s.OtherDiscipline)
              .Include(s => s.LessonTime)
              .Include(s => s.ScheduleGroups)
              .ThenInclude(sg => sg.Group)
@@ -106,6 +123,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
                 .Include(s => s.Classroom)
                 .Include(s => s.Discipline)
+                .Include(s => s.OtherDiscipline)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -140,6 +158,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
                 .Include(s => s.Classroom)
                 .Include(s => s.Discipline)
+                .Include(s => s.OtherDiscipline)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -175,6 +194,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
              .Include(s => s.Classroom)
              .Include(s => s.Discipline)
+             .Include(s => s.OtherDiscipline)
              .Include(s => s.LessonTime)
              .Include(s => s.ScheduleGroups)
              .ThenInclude(sg => sg.Group)
@@ -209,6 +229,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
                 .Include(s => s.Classroom)
                 .Include(s => s.Discipline)
+                .Include(s => s.OtherDiscipline)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -243,6 +264,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
                 .Include(s => s.Classroom)
                 .Include(s => s.Discipline)
+                .Include(s => s.OtherDiscipline)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -278,6 +300,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
              .Include(s => s.Classroom)
              .Include(s => s.Discipline)
+             .Include(s => s.OtherDiscipline)
              .Include(s => s.LessonTime)
              .Include(s => s.ScheduleGroups)
              .ThenInclude(sg => sg.Group)
@@ -312,6 +335,7 @@ namespace API.Controllers
             var schedules = await _context.Schedules
                 .Include(s => s.Classroom)
                 .Include(s => s.Discipline)
+                .Include(s => s.OtherDiscipline)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)

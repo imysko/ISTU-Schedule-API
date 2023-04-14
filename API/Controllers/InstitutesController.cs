@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using API.Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.DataBase.Context;
-using API.DataBase.Models;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
