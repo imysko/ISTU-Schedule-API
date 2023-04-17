@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  schedule_api:
-    container_name: schedule-api
+  api-service:
+    container_name: api-service
     build: API
     logging:
       options:
@@ -11,6 +11,8 @@ services:
     restart: always
     ports:
       - "7013:80"
+    env_file:
+      - config/common.env
 
   getting-service:
     container_name: getting-service
@@ -22,3 +24,9 @@ services:
     restart: always
     stdin_open: true
     tty: true
+    env_file:
+      - config/common.env
+      - config/telegram.env
+    volumes:
+      - ./config:/app/config
+      
