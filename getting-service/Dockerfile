@@ -11,5 +11,4 @@ RUN dotnet build -c Debug -o build --use-current-runtime --self-contained false 
 FROM mcr.microsoft.com/dotnet/runtime:7.0
 WORKDIR /app
 COPY --from=build /app/build .
-COPY updatedates.json .
 ENTRYPOINT ["dotnet", "getting-service.dll"]
