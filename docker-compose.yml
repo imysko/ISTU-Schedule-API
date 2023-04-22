@@ -22,8 +22,8 @@ services:
         max-size: "200M"
         max-file: "4"
     restart: always
-    stdin_open: true
-    tty: true
+    ports:
+      - "5723:5723"
     env_file:
       - config/common.env
       - config/telegram.env

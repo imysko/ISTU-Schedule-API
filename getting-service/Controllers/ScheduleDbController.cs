@@ -84,7 +84,7 @@ public class ScheduleDbController
             case "schedule":
             {
                 await CallTaskWithLogging(
-                    async () => await PutSchedule(response[key]!.ToObject<List<ScheduleResponse>>()!),
+                    async () => await PutSchedules(response[key]!.ToObject<List<ScheduleResponse>>()!),
                     "Schedule"
                 );
                 break;
@@ -225,35 +225,54 @@ public class ScheduleDbController
         await _context.SaveChangesAsync();
     }
 
-    private async Task PutSchedule(List<ScheduleResponse> schedules)
+    private async Task PutSchedules(IReadOnlyCollection<ScheduleResponse> schedules)
     {
-        foreach (var el in schedules)
+        const int batchSize = 10;
+
+        for (var i = 0; i < schedules.Count; i += batchSize)
         {
-            var newSchedule = await ConvertScheduleResponseToSchedule(el);
+            var batch = schedules.Skip(i).Take(batchSize).ToList();
 
-            var existingSchedule = await _context.Schedules.FindAsync(newSchedule.ScheduleId);
+            var newSchedules = new List<Schedule>();
+            foreach (var el in batch)
+            {
+                var newSchedule = await ConvertScheduleResponseToSchedule(el);
+                newSchedules.Add(newSchedule);
+            }
 
-            if (existingSchedule != null)
+            foreach (var schedule in newSchedules)
             {
-                _context.Entry(existingSchedule).CurrentValues.SetValues(newSchedule);
-                await PutScheduleGroups(newSchedule);
-                await PutScheduleTeachers(newSchedule);
+                await PutSchedule(schedule);
+                await PutScheduleGroups(schedule);
+                await PutScheduleTeachers(schedule);
             }
-            else
-            {
-                await _context.Schedules.AddAsync(newSchedule);
-            }
+
+            await _context.SaveChangesAsync();
         }
+    }
 
-        await _context.SaveChangesAsync();
+    private async Task PutSchedule(Schedule schedule)
+    {
+        var existingSchedule = await _context.Schedules.FirstOrDefaultAsync(s => s.ScheduleId == schedule.ScheduleId);
+
+        if (existingSchedule != null)
+        {
+            _context.Entry(existingSchedule).CurrentValues.SetValues(schedule);
+        }
+        else
+        {
+            await _context.Schedules.AddAsync(schedule);
+        }
     }
 
     private async Task PutScheduleGroups(Schedule schedule)
     {
+        var newScheduleGroups = new List<ScheduleGroup>();
         foreach (var scheduleGroup in schedule.ScheduleGroups)
         {
             var existingScheduleGroup =
-                await _context.ScheduleGroups.FirstOrDefaultAsync(sg => sg.ScheduleId == scheduleGroup.ScheduleId);
+                await _context.ScheduleGroups.FirstOrDefaultAsync(sg =>
+                    sg.ScheduleId == scheduleGroup.ScheduleId && sg.GroupId == scheduleGroup.GroupId);
 
             if (existingScheduleGroup != null)
             {
@@ -261,17 +280,21 @@ public class ScheduleDbController
             }
             else
             {
-                await _context.ScheduleGroups.AddAsync(scheduleGroup);
+                newScheduleGroups.Add(scheduleGroup);
             }
         }
+
+        await _context.ScheduleGroups.AddRangeAsync(newScheduleGroups);
     }
 
     private async Task PutScheduleTeachers(Schedule schedule)
     {
+        var newScheduleTeachers = new List<ScheduleTeacher>();
         foreach (var scheduleTeacher in schedule.ScheduleTeachers)
         {
             var existingScheduleTeacher =
-                await _context.ScheduleTeachers.FirstOrDefaultAsync(st => st.ScheduleId == scheduleTeacher.ScheduleId);
+                await _context.ScheduleTeachers.FirstOrDefaultAsync(st =>
+                    st.ScheduleId == scheduleTeacher.ScheduleId && st.TeacherId == scheduleTeacher.TeacherId);
 
             if (existingScheduleTeacher != null)
             {
@@ -279,9 +302,11 @@ public class ScheduleDbController
             }
             else
             {
-                await _context.ScheduleTeachers.AddAsync(scheduleTeacher);
+                newScheduleTeachers.Add(scheduleTeacher);
             }
         }
+
+        await _context.ScheduleTeachers.AddRangeAsync(newScheduleTeachers);
     }
 
     private async Task<List<ScheduleTeacher>> FindScheduleTeachers(ScheduleResponse schedule)
@@ -301,7 +326,7 @@ public class ScheduleDbController
             }
         }
 
-        return scheduleTeachers.Distinct().ToList();
+        return scheduleTeachers.DistinctBy(st => new { st.ScheduleId, st.TeacherId }).ToList();
     }
 
     private async Task<List<ScheduleGroup>> FindScheduleGroups(ScheduleResponse schedule)
@@ -321,7 +346,7 @@ public class ScheduleDbController
             }
         }
 
-        return scheduleGroups.Distinct().ToList();
+        return scheduleGroups.DistinctBy(sg => new { sg.ScheduleId, sg.GroupId }).ToList();
     }
 
     private async Task<int?> FindClassroomId(ScheduleResponse schedule)
@@ -339,7 +364,7 @@ public class ScheduleDbController
         var classroomId = await FindClassroomId(scheduleResponse);
         var scheduleGroups = await FindScheduleGroups(scheduleResponse);
         var scheduleTeachers = await FindScheduleTeachers(scheduleResponse);
-        
+
         return new Schedule
         {
             ScheduleId = scheduleResponse.ScheduleId,

@@ -136,6 +136,19 @@ public class TelegramService : BackgroundService
         }
         switch (message)
         {
+            case "all":
+                await SendMessageToBot("/api/institutes");
+                await SendMessageToBot("/api/groups");
+                await SendMessageToBot("/api/teachers");
+                await SendMessageToBot("/api/classrooms");
+                await SendMessageToBot("/api/disciplines");
+                await SendMessageToBot("/api/lessons_time");
+                await SendMessageToBot("/api/other_disciplines");
+                await SendMessageToBot("/api/schedule/two_weeks");
+                break;
+            case "lessons time":
+                await SendMessageToBot("/api/lessons_time");
+                break;
             case "institutes":
                 await SendMessageToBot("/api/institutes");
                 break;
@@ -145,14 +158,14 @@ public class TelegramService : BackgroundService
             case "teachers":
                 await SendMessageToBot("/api/teachers");
                 break;
+            case "classrooms":
+                await SendMessageToBot("/api/classrooms");
+                break;
             case "disciplines":
                 await SendMessageToBot("/api/disciplines");
                 break;
             case "other disciplines":
                 await SendMessageToBot("/api/other_disciplines");
-                break;
-            case "classrooms":
-                await SendMessageToBot("/api/classrooms");
                 break;
             case "schedule two weeks":
                 await SendMessageToBot("/api/schedule/two_weeks");

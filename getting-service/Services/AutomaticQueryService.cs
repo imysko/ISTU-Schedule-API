@@ -18,9 +18,6 @@ public class AutomaticQueryService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Console.WriteLine("Starting automatic query service");
-
-        await Task.Delay(5000, stoppingToken);
-        Program.MessageQueue.Enqueue("schedule two weeks");
         
         await Task.CompletedTask;
     }
@@ -77,9 +74,11 @@ public class AutomaticQueryService : BackgroundService
     {
         Program.MessageQueue.Enqueue("institutes");
         Program.MessageQueue.Enqueue("groups");
-        Program.MessageQueue.Enqueue("teachers");
-        Program.MessageQueue.Enqueue("other disciplines");
         Program.MessageQueue.Enqueue("classrooms");
+        Program.MessageQueue.Enqueue("lessons time");
+        Program.MessageQueue.Enqueue("teachers");
+        Program.MessageQueue.Enqueue("disciplines");
+        Program.MessageQueue.Enqueue("other disciplines");
         Program.MessageQueue.Enqueue("schedule three months");
         return Task.CompletedTask;
     }
