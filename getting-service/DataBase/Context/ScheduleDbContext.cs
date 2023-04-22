@@ -5,13 +5,8 @@ namespace getting_service.DataBase.Context;
 
 public partial class ScheduleDbContext : DbContext
 {
-    private readonly string ConnectionString;
-    
-    public ScheduleDbContext(string connectionString)
-    {
-        ConnectionString = connectionString;
-    }
-
+    private readonly string _connectionString;
+ 
     public ScheduleDbContext(DbContextOptions<ScheduleDbContext> options)
         : base(options)
     {
@@ -36,9 +31,6 @@ public partial class ScheduleDbContext : DbContext
     public virtual DbSet<ScheduleGroup> ScheduleGroups { get; set; }
     
     public virtual DbSet<ScheduleTeacher> ScheduleTeachers { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql(ConnectionString);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

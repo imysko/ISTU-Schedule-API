@@ -1,15 +1,14 @@
 ﻿using System.Globalization;
-using getting_service.Data.Enums;
 using getting_service.Data.Models;
 using getting_service.DataBase.Context;
 using getting_service.DataBase.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 
 namespace getting_service.Controllers;
 
 public class ScheduleDbController
 {
-    private readonly object _lock = new();
     private readonly ScheduleDbContext _context;
 
     public ScheduleDbController(ScheduleDbContext context)
@@ -93,308 +92,270 @@ public class ScheduleDbController
         }
     }
 
-    private Task PutInstitutes(List<Institute> list)
+    private async Task PutInstitutes(List<Institute> institutes)
     {
-        lock (_lock)
+        foreach (var institute in institutes)
         {
-            var existingInstitutesById = _context.Institutes.ToDictionary(i => i.InstituteId);
+            var existingInstitute = await _context.Institutes.FindAsync(institute.InstituteId);
 
-            var newInstitutes = new List<Institute>();
-            foreach (var institute in list)
+            if (existingInstitute != null)
             {
-                if (existingInstitutesById.TryGetValue(institute.InstituteId, out var existingInstitute))
-                {
-                    _context.Entry(existingInstitute).CurrentValues.SetValues(institute);
-                }
-                else
-                {
-                    newInstitutes.Add(institute);
-                }
+                _context.Entry(existingInstitute).CurrentValues.SetValues(institute);
             }
-
-            _context.Institutes.AddRange(newInstitutes);
-            _context.Institutes.UpdateRange(existingInstitutesById.Values.Except(newInstitutes));
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.Institutes.AddAsync(institute);
+            }
         }
 
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
     }
 
-    private Task PutGroups(List<Group> list)
+    private async Task PutGroups(List<Group> groups)
     {
-        lock (_lock)
+        foreach (var group in groups)
         {
-            var existingGroupsById = _context.Groups.ToDictionary(g => g.GroupId);
+            var existingGroup = await _context.Groups.FindAsync(group.GroupId);
 
-            var newGroups = new List<Group>();
-            foreach (var group in list)
+            if (existingGroup != null)
             {
-                if (existingGroupsById.TryGetValue(group.GroupId, out var existingGroup))
-                {
-                    _context.Entry(existingGroup).CurrentValues.SetValues(group);
-                }
-                else
-                {
-                    newGroups.Add(group);
-                }
+                _context.Entry(existingGroup).CurrentValues.SetValues(group);
             }
-
-            _context.Groups.AddRange(newGroups);
-            _context.Groups.UpdateRange(existingGroupsById.Values.Except(newGroups));
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.Groups.AddAsync(group);
+            }
         }
 
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
     }
 
-    private Task PutTeachers(List<Teacher> list)
+    private async Task PutTeachers(List<Teacher> teachers)
     {
-        lock (_lock)
+        foreach (var teacher in teachers)
         {
-            var existingTeachersById = _context.Teachers.ToDictionary(t => t.TeacherId);
+            var existingTeacher = await _context.Teachers.FindAsync(teacher.TeacherId);
 
-            var newTeachers = new List<Teacher>();
-            foreach (var teacher in list)
+            if (existingTeacher != null)
             {
-                if (existingTeachersById.TryGetValue(teacher.TeacherId, out var existingTeacher))
-                {
-                    _context.Entry(existingTeacher).CurrentValues.SetValues(teacher);
-                }
-                else
-                {
-                    newTeachers.Add(teacher);
-                }
+                _context.Entry(existingTeacher).CurrentValues.SetValues(teacher);
             }
-
-            _context.Teachers.AddRange(newTeachers);
-            _context.Teachers.UpdateRange(existingTeachersById.Values.Except(newTeachers));
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.Teachers.AddAsync(teacher);
+            }
         }
 
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
     }
 
-    private Task PutClassrooms(List<Classroom> list)
+    private async Task PutClassrooms(List<Classroom> classrooms)
     {
-        lock (_lock)
+        foreach (var classroom in classrooms)
         {
-            var existingClassroomsById = _context.Classrooms.ToDictionary(c => c.ClassroomId);
+            var existingClassroom = await _context.Classrooms.FindAsync(classroom.ClassroomId);
 
-            var newClassrooms = new List<Classroom>();
-            foreach (var classroom in list)
+            if (existingClassroom != null)
             {
-                if (existingClassroomsById.TryGetValue(classroom.ClassroomId, out var existingClassroom))
-                {
-                    _context.Entry(existingClassroom).CurrentValues.SetValues(classroom);
-                }
-                else
-                {
-                    newClassrooms.Add(classroom);
-                }
+                _context.Entry(existingClassroom).CurrentValues.SetValues(classroom);
             }
-
-            _context.Classrooms.AddRange(newClassrooms);
-            _context.Classrooms.UpdateRange(existingClassroomsById.Values.Except(newClassrooms));
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.Classrooms.AddAsync(classroom);
+            }
         }
 
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
     }
 
-    private Task PutLessonsTime(List<LessonsTime> list)
+    private async Task PutLessonsTime(List<LessonsTime> lessonsTimes)
     {
-        lock (_lock)
+        foreach (var lessonsTime in lessonsTimes)
         {
-            var existingLessonsTimesById = _context.LessonsTimes.ToDictionary(lt => lt.LessonId);
+            var existingLessonsTime = await _context.LessonsTimes.FindAsync(lessonsTime.LessonId);
 
-            var newLessonsTimes = new List<LessonsTime>();
-            foreach (var lessonsTime in list)
+            if (existingLessonsTime != null)
             {
-                if (existingLessonsTimesById.TryGetValue(lessonsTime.LessonId, out var existingLessonsTime))
-                {
-                    _context.Entry(existingLessonsTime).CurrentValues.SetValues(lessonsTime);
-                }
-                else
-                {
-                    newLessonsTimes.Add(lessonsTime);
-                }
+                _context.Entry(existingLessonsTime).CurrentValues.SetValues(lessonsTime);
             }
-
-            _context.LessonsTimes.AddRange(newLessonsTimes);
-            _context.LessonsTimes.UpdateRange(existingLessonsTimesById.Values.Except(newLessonsTimes));
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.LessonsTimes.AddAsync(lessonsTime);
+            }
         }
 
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
     }
 
-    private Task PutDisciplines(List<Discipline> list)
+    private async Task PutDisciplines(List<Discipline> disciplines)
     {
-        lock (_lock)
+        foreach (var discipline in disciplines)
         {
-            var existingDisciplinesById = _context.Disciplines.ToDictionary(d => d.DisciplineId);
+            var existingDiscipline = await _context.Disciplines.FindAsync(discipline.DisciplineId);
 
-            var newDisciplines = new List<Discipline>();
-            foreach (var discipline in list)
+            if (existingDiscipline != null)
             {
-                if (existingDisciplinesById.TryGetValue(discipline.DisciplineId, out var existingDiscipline))
-                {
-                    _context.Entry(existingDiscipline).CurrentValues.SetValues(discipline);
-                }
-                else
-                {
-                    newDisciplines.Add(discipline);
-                }
+                _context.Entry(existingDiscipline).CurrentValues.SetValues(discipline);
             }
-
-            _context.Disciplines.AddRange(newDisciplines);
-            _context.Disciplines.UpdateRange(existingDisciplinesById.Values.Except(newDisciplines));
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.Disciplines.AddAsync(discipline);
+            }
         }
 
-        return Task.CompletedTask;
-    }
-    
-    private Task PutOtherDisciplines(List<OtherDiscipline> list)
-    {
-        lock (_lock)
-        {
-            var existingOtherDisciplinesById = _context.OtherDisciplines.ToDictionary(o => o.OtherDisciplineId);
-
-            var newOtherDisciplines = new List<OtherDiscipline>();
-            foreach (var otherDiscipline in list)
-            {
-                if (existingOtherDisciplinesById.TryGetValue(otherDiscipline.OtherDisciplineId, out var existingDiscipline))
-                {
-                    _context.Entry(existingDiscipline).CurrentValues.SetValues(otherDiscipline);
-                }
-                else
-                {
-                    newOtherDisciplines.Add(otherDiscipline);
-                }
-            }
-
-            _context.OtherDisciplines.AddRange(newOtherDisciplines);
-            _context.OtherDisciplines.UpdateRange(existingOtherDisciplinesById.Values.Except(newOtherDisciplines));
-
-            _context.SaveChanges();
-        }
-
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
     }
 
-    private Task PutSchedule(List<ScheduleResponse> list)
+    private async Task PutOtherDisciplines(List<OtherDiscipline> disciplines)
     {
-        lock (_lock)
+        foreach (var discipline in disciplines)
         {
-            var existingSchedules = _context.Schedules.ToList();
-            var existingClassrooms = _context.Classrooms.ToList();
-            var existingDisciplines = _context.Disciplines.ToList();
-            var existingOtherDisciplines = _context.OtherDisciplines.ToList();
-            var existingGroups = _context.Groups.ToList();
-            var existingTeachers = _context.Teachers.ToList();
-            var existingLessonsTimes = _context.LessonsTimes.ToList();
-            var existingSchedulesGroups = _context.ScheduleGroups.ToList();
-            var existingSchedulesTeachers = _context.ScheduleTeachers.ToList();
+            var existingDiscipline = await _context.OtherDisciplines.FindAsync(discipline.OtherDisciplineId);
 
-            var newSchedules = new List<Schedule>();
-            var newScheduleGroupsList = new List<ScheduleGroup>();
-            var newSchedulesTeachersList = new List<ScheduleTeacher>();
-
-            foreach (var el in list)
+            if (existingDiscipline != null)
             {
-                if (el.GroupsIds != null)
-                {
-                    foreach (var id in el.GroupsIds)
-                    {
-                        if (id == null ||
-                            existingSchedulesGroups.Any(s => s.ScheduleId == el.ScheduleId && s.GroupId == id.Value) ||
-                            newScheduleGroupsList.Any(s => s.ScheduleId == el.ScheduleId && s.GroupId == id.Value))
-                            continue;
-
-                        if (existingGroups.All(g => g.GroupId != id)) continue;
-
-                        newScheduleGroupsList.Add(new ScheduleGroup
-                        {
-                            ScheduleId = el.ScheduleId,
-                            GroupId = id.Value
-                        });
-                    }
-                }
-
-                if (el.TeachersIds != null)
-                {
-                    foreach (var id in el.TeachersIds)
-                    {
-                        if (id == null ||
-                            existingSchedulesTeachers.Any(s =>
-                                s.ScheduleId == el.ScheduleId && s.TeacherId == id.Value) ||
-                            newSchedulesTeachersList.Any(s => s.ScheduleId == el.ScheduleId && s.TeacherId == id.Value))
-                            continue;
-
-                        if (existingTeachers.All(t => t.TeacherId != id)) continue;
-
-                        newSchedulesTeachersList.Add(new ScheduleTeacher
-                        {
-                            ScheduleId = el.ScheduleId,
-                            TeacherId = id.Value
-                        });
-                    }
-                }
-
-                var newSchedule = new Schedule
-                {
-                    ScheduleId = el.ScheduleId,
-                    GroupsVerbose = el.GroupsVerbose,
-                    TeachersVerbose = el.TeachersVerbose,
-                    ClassroomId = existingClassrooms.FirstOrDefault(c =>
-                                      el.ClassroomsIds != null && el.ClassroomsIds.Any(it => it == c.ClassroomId))
-                                  ?.ClassroomId ??
-                                  null,
-                    ClassroomVerbose = el.ClassroomsVerbose,
-                    DisciplineId =
-                        existingDisciplines.FirstOrDefault(d => d.DisciplineId == el.DisciplineId)?.DisciplineId ??
-                        null,
-                    DisciplineVerbose = el.DisciplineVerbose,
-                    OtherDisciplineId = 
-                        existingOtherDisciplines.FirstOrDefault(o => o.OtherDisciplineId == el.OtherDisciplineId)?
-                            .OtherDisciplineId ?? null,
-                    LessonId = existingLessonsTimes.FirstOrDefault(l => l.LessonId == el.LessonId)?.LessonId ?? null,
-                    Subgroup = el.Subgroup,
-                    LessonType = el.LessonType != LessonType.Unknown ? el.LessonType : 
-                        existingOtherDisciplines.FirstOrDefault(o => o.OtherDisciplineId == el.OtherDisciplineId)?
-                            .Type == OtherDisciplineType.Project ? LessonType.Project : LessonType.Unknown,
-                    ScheduleType = el.ScheduleType,
-                    Date = DateOnly.ParseExact(el.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture)
-                };
-
-                var existingSchedule = existingSchedules.FirstOrDefault(s => s.ScheduleId == newSchedule.ScheduleId);
-                if (existingSchedule != null)
-                {
-                    _context.Entry(existingSchedule).CurrentValues.SetValues(newSchedule);
-                }
-                else
-                {
-                    newSchedules.Add(newSchedule);
-                }
+                _context.Entry(existingDiscipline).CurrentValues.SetValues(discipline);
             }
-
-            _context.Schedules.AddRange(newSchedules);
-            _context.Schedules.UpdateRange(existingSchedules.Except(newSchedules));
-
-            _context.ScheduleGroups.AddRange(newScheduleGroupsList);
-            _context.ScheduleTeachers.AddRange(newSchedulesTeachersList);
-
-            _context.SaveChanges();
+            else
+            {
+                await _context.OtherDisciplines.AddAsync(discipline);
+            }
         }
 
-        return Task.CompletedTask;
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task PutSchedule(List<ScheduleResponse> schedules)
+    {
+        foreach (var el in schedules)
+        {
+            var newSchedule = await ConvertScheduleResponseToSchedule(el);
+
+            var existingSchedule = await _context.Schedules.FindAsync(newSchedule.ScheduleId);
+
+            if (existingSchedule != null)
+            {
+                _context.Entry(existingSchedule).CurrentValues.SetValues(newSchedule);
+                await PutScheduleGroups(newSchedule);
+                await PutScheduleTeachers(newSchedule);
+            }
+            else
+            {
+                await _context.Schedules.AddAsync(newSchedule);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task PutScheduleGroups(Schedule schedule)
+    {
+        foreach (var scheduleGroup in schedule.ScheduleGroups)
+        {
+            var existingScheduleGroup =
+                await _context.ScheduleGroups.FirstOrDefaultAsync(sg => sg.ScheduleId == scheduleGroup.ScheduleId);
+
+            if (existingScheduleGroup != null)
+            {
+                _context.Entry(existingScheduleGroup).CurrentValues.SetValues(scheduleGroup);
+            }
+            else
+            {
+                await _context.ScheduleGroups.AddAsync(scheduleGroup);
+            }
+        }
+    }
+
+    private async Task PutScheduleTeachers(Schedule schedule)
+    {
+        foreach (var scheduleTeacher in schedule.ScheduleTeachers)
+        {
+            var existingScheduleTeacher =
+                await _context.ScheduleTeachers.FirstOrDefaultAsync(st => st.ScheduleId == scheduleTeacher.ScheduleId);
+
+            if (existingScheduleTeacher != null)
+            {
+                _context.Entry(existingScheduleTeacher).CurrentValues.SetValues(scheduleTeacher);
+            }
+            else
+            {
+                await _context.ScheduleTeachers.AddAsync(scheduleTeacher);
+            }
+        }
+    }
+
+    private async Task<List<ScheduleTeacher>> FindScheduleTeachers(ScheduleResponse schedule)
+    {
+        if (schedule.TeachersIds == null) return new List<ScheduleTeacher>();
+
+        var scheduleTeachers = new List<ScheduleTeacher>();
+        foreach (var teacherId in schedule.TeachersIds)
+        {
+            if (teacherId != null && await _context.Teachers.AnyAsync(t => t.TeacherId == teacherId))
+            {
+                scheduleTeachers.Add(new ScheduleTeacher
+                {
+                    ScheduleId = schedule.ScheduleId,
+                    TeacherId = teacherId.Value
+                });
+            }
+        }
+
+        return scheduleTeachers.Distinct().ToList();
+    }
+
+    private async Task<List<ScheduleGroup>> FindScheduleGroups(ScheduleResponse schedule)
+    {
+        if (schedule.GroupsIds == null) return new List<ScheduleGroup>();
+
+        var scheduleGroups = new List<ScheduleGroup>();
+        foreach (var groupId in schedule.GroupsIds)
+        {
+            if (groupId != null && await _context.Groups.AnyAsync(g => g.GroupId == groupId))
+            {
+                scheduleGroups.Add(new ScheduleGroup
+                {
+                    ScheduleId = schedule.ScheduleId,
+                    GroupId = groupId.Value
+                });
+            }
+        }
+
+        return scheduleGroups.Distinct().ToList();
+    }
+
+    private async Task<int?> FindClassroomId(ScheduleResponse schedule)
+    {
+        if (schedule.ClassroomsIds == null) return null;
+
+        var classroom =
+            await _context.Classrooms.FirstOrDefaultAsync(c => schedule.ClassroomsIds.Contains(c.ClassroomId));
+
+        return classroom?.ClassroomId;
+    }
+
+    private async Task<Schedule> ConvertScheduleResponseToSchedule(ScheduleResponse scheduleResponse)
+    {
+        var classroomId = await FindClassroomId(scheduleResponse);
+        var scheduleGroups = await FindScheduleGroups(scheduleResponse);
+        var scheduleTeachers = await FindScheduleTeachers(scheduleResponse);
+        
+        return new Schedule
+        {
+            ScheduleId = scheduleResponse.ScheduleId,
+            GroupsVerbose = scheduleResponse.GroupsVerbose,
+            TeachersVerbose = scheduleResponse.TeachersVerbose,
+            ClassroomId = classroomId,
+            ClassroomVerbose = scheduleResponse.ClassroomsVerbose,
+            DisciplineId = scheduleResponse.DisciplineId,
+            DisciplineVerbose = scheduleResponse.DisciplineVerbose,
+            LessonId = scheduleResponse.LessonId,
+            Subgroup = scheduleResponse.Subgroup,
+            LessonType = scheduleResponse.LessonType,
+            Date = DateOnly.ParseExact(scheduleResponse.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ScheduleGroups = scheduleGroups,
+            ScheduleTeachers = scheduleTeachers
+        };
     }
 
     private static async Task CallTaskWithLogging(Func<Task> asyncFunction, string message)
@@ -409,12 +370,12 @@ public class ScheduleDbController
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{message} was received");
             Console.ResetColor();
-            
+
             await asyncFunction();
 
             var endDateTime = DateTime.Now;
             var diffInSeconds = (endDateTime - startDateTime).TotalSeconds;
-            
+
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.Write($"{endDateTime} - ");
             Console.ResetColor();

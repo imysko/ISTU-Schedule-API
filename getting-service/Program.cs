@@ -1,4 +1,5 @@
-﻿using DotNetEnv.Configuration;
+﻿using System.Collections.Concurrent;
+using DotNetEnv.Configuration;
 using getting_service.Data;
 using getting_service.DataBase.Context;
 using getting_service.Services;
@@ -12,11 +13,14 @@ namespace getting_service;
 
 internal static class Program
 {
+    public static ConcurrentQueue<string> MessageQueue { get; } = new();
+    public static ConcurrentQueue<string> FilePathQueue { get; } = new();
+
     private const string AppSettingsFile = "appsettings.json";
     private const string TelegramEnvFile = "config/telegram.env";
-    
+
     private const string TelegramSection = "TelegramConfig";
-    
+
     private static async Task Main()
     {
         var builder = new HostBuilder();
@@ -28,21 +32,25 @@ internal static class Program
             config.AddDotNetEnv(TelegramEnvFile);
             config.AddEnvironmentVariables();
         });
-        
+
         builder.ConfigureServices((hostingContext, services) =>
         {
             services.AddOptions<TelegramConfig>()
                 .Bind(hostingContext.Configuration.GetSection(TelegramSection));
 
-            services.Configure<TelegramConfig>(options 
+            services.Configure<TelegramConfig>(options
                 => hostingContext.Configuration.GetSection(TelegramSection).Bind(options));
             
             services.AddSingleton<IOptionsMonitor<TelegramConfig>, OptionsMonitor<TelegramConfig>>();
 
-            services.AddDbContext<ScheduleDbContext>(options => 
+            Console.WriteLine(hostingContext.Configuration.GetConnectionString("ScheduleDB"));
+            services.AddDbContext<ScheduleDbContext>(options =>
                 options.UseNpgsql(hostingContext.Configuration.GetConnectionString("ScheduleDB")));
 
-            services.AddHostedService<GettingService>();
+            services.AddHostedService<TelegramService>();
+            services.AddHostedService<SocatService>();
+            services.AddHostedService<AutomaticQueryService>();
+            services.AddHostedService<DatabaseService>();
         });
 
         await builder.RunConsoleAsync();
