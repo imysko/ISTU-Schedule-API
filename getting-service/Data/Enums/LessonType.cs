@@ -6,5 +6,6 @@ public enum LessonType
     Lecture = 1,
     Practical = 2,
     LaboratoryWork = 3,
-    Project = 4
+    Exam = 6,
+    Project = 7
 }

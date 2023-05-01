@@ -32,8 +32,11 @@ public class ScheduleResponse
     [JsonProperty("discipline_verbose")]
     public string? DisciplineVerbose { get; set; }
     
-    [JsonProperty("other_discipline")]
+    [JsonProperty("other_discipline_id")]
     public int? OtherDisciplineId { get; set; }
+    
+    [JsonProperty("query_id")]
+    public int? QueryId { get; set; }
     
     [JsonProperty("lesson_id")]
     public int? LessonId { get; set; }

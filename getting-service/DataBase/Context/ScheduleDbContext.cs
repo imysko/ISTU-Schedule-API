@@ -17,6 +17,8 @@ public partial class ScheduleDbContext : DbContext
     public virtual DbSet<Discipline> Disciplines { get; set; }
     
     public virtual DbSet<OtherDiscipline> OtherDisciplines { get; set; }
+    
+    public virtual DbSet<Query> Queries { get; set; }
 
     public virtual DbSet<Group> Groups { get; set; }
 
@@ -65,6 +67,19 @@ public partial class ScheduleDbContext : DbContext
             entity.Property(e => e.DisciplineTitle).HasColumnName("discipline_title");
             entity.Property(e => e.IsOnline).HasColumnName("is_online");
             entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.ProjectActive).HasColumnName("project_active");
+            entity.Property(e => e.ProjfairProjectId).HasColumnName("projfair_project_id");
+        });
+        
+        modelBuilder.Entity<Query>(entity =>
+        {
+            entity.HasKey(e => e.QueryId).HasName("query_pkey");
+
+            entity.ToTable("queries");
+
+            entity.Property(e => e.QueryId).HasColumnName("query_id");
+            entity.Property(e => e.Description).HasColumnName("description");
         });
 
         modelBuilder.Entity<Group>(entity =>
@@ -77,6 +92,7 @@ public partial class ScheduleDbContext : DbContext
             entity.Property(e => e.Course).HasColumnName("course");
             entity.Property(e => e.InstituteId).HasColumnName("institute_id");
             entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
 
             entity.HasOne(d => d.Institute).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.InstituteId)
@@ -157,6 +173,7 @@ public partial class ScheduleDbContext : DbContext
             entity.Property(e => e.DisciplineId).HasColumnName("discipline_id");
             entity.Property(e => e.DisciplineVerbose).HasColumnName("discipline_verbose");
             entity.Property(e => e.OtherDisciplineId).HasColumnName("other_discipline_id");
+            entity.Property(e => e.QueryId).HasColumnName("query_id");
             entity.Property(e => e.GroupsVerbose).HasColumnName("groups_verbose");
             entity.Property(e => e.LessonId).HasColumnName("lesson_id");
             entity.Property(e => e.LessonType).HasColumnName("lesson_type");
@@ -174,6 +191,10 @@ public partial class ScheduleDbContext : DbContext
             entity.HasOne(d => d.OtherDiscipline).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.OtherDisciplineId)
                 .HasConstraintName("other_discipline_fk");
+            
+            entity.HasOne(d => d.Query).WithMany(p => p.Schedules)
+                .HasForeignKey(d => d.QueryId)
+                .HasConstraintName("query_fk");
 
             entity.HasOne(d => d.LessonTime).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.LessonId)

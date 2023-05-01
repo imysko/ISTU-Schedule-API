@@ -76,8 +76,16 @@ public class ScheduleDbController
             case "other_disciplines":
             {
                 await CallTaskWithLogging(
-                    async () => await PutOtherDisciplines(response[key]!.ToObject<List<OtherDiscipline>>()!),
+                    async () => await PutOtherDisciplines(response[key]!.ToObject<List<OtherDisciplineResponse>>()!),
                     "Other Disciplines"
+                );
+                break;
+            }
+            case "queries":
+            {
+                await CallTaskWithLogging(
+                    async () => await PutQueries(response[key]!.ToObject<List<Query>>()!),
+                    "Queries"
                 );
                 break;
             }
@@ -206,19 +214,45 @@ public class ScheduleDbController
         await _context.SaveChangesAsync();
     }
 
-    private async Task PutOtherDisciplines(List<OtherDiscipline> disciplines)
+    private async Task PutOtherDisciplines(List<OtherDisciplineResponse> otherDisciplines)
     {
-        foreach (var discipline in disciplines)
+        var newOtherDisciplines = new List<OtherDiscipline>();
+        foreach (var el in otherDisciplines)
         {
-            var existingDiscipline = await _context.OtherDisciplines.FindAsync(discipline.OtherDisciplineId);
+            var newOtherDiscipline = await ConvertOtherDisciplineResponseToOtherDiscipline(el);
+            newOtherDisciplines.Add(newOtherDiscipline);
+        }
+        
+        foreach (var otherDiscipline in newOtherDisciplines)
+        {
+            var existingDiscipline = await _context.OtherDisciplines.FindAsync(otherDiscipline.OtherDisciplineId);
 
             if (existingDiscipline != null)
             {
-                _context.Entry(existingDiscipline).CurrentValues.SetValues(discipline);
+                _context.Entry(existingDiscipline).CurrentValues.SetValues(otherDiscipline);
             }
             else
             {
-                await _context.OtherDisciplines.AddAsync(discipline);
+                await _context.OtherDisciplines.AddAsync(otherDiscipline);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+    
+    private async Task PutQueries(List<Query> queries)
+    {
+        foreach (var query in queries)
+        {
+            var existingQuery = await _context.Queries.FindAsync(query.QueryId);
+
+            if (existingQuery != null)
+            {
+                _context.Entry(existingQuery).CurrentValues.SetValues(query);
+            }
+            else
+            {
+                await _context.Queries.AddAsync(query);
             }
         }
 
@@ -358,6 +392,20 @@ public class ScheduleDbController
 
         return classroom?.ClassroomId;
     }
+    
+    private async Task<OtherDiscipline> ConvertOtherDisciplineResponseToOtherDiscipline(OtherDisciplineResponse otherDisciplineResponse)
+    {
+        return new OtherDiscipline()
+        {
+            OtherDisciplineId = otherDisciplineResponse.OtherDisciplineId,
+            DisciplineTitle = otherDisciplineResponse.DisciplineTitle,
+            IsOnline = otherDisciplineResponse.IsOnline,
+            Type = otherDisciplineResponse.Type,
+            IsActive = otherDisciplineResponse.IsActive,
+            ProjectActive = otherDisciplineResponse.ProjectActive,
+            ProjfairProjectId = null
+        };
+    }
 
     private async Task<Schedule> ConvertScheduleResponseToSchedule(ScheduleResponse scheduleResponse)
     {
@@ -374,6 +422,8 @@ public class ScheduleDbController
             ClassroomVerbose = scheduleResponse.ClassroomsVerbose,
             DisciplineId = scheduleResponse.DisciplineId,
             DisciplineVerbose = scheduleResponse.DisciplineVerbose,
+            OtherDisciplineId = scheduleResponse.OtherDisciplineId,
+            QueryId = scheduleResponse.QueryId,
             LessonId = scheduleResponse.LessonId,
             Subgroup = scheduleResponse.Subgroup,
             LessonType = scheduleResponse.LessonType,

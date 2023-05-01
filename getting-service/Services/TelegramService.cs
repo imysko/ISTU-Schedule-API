@@ -167,6 +167,9 @@ public class TelegramService : BackgroundService
             case "other disciplines":
                 await SendMessageToBot("/api/other_disciplines");
                 break;
+            case "queries":
+                await SendMessageToBot("/api/queries");
+                break;
             case "schedule two weeks":
                 await SendMessageToBot("/api/schedule/two_weeks");
                 break;

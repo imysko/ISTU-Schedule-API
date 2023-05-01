@@ -20,6 +20,8 @@ public partial class Schedule
     
     public int? OtherDisciplineId { get; set; }
     
+    public int? QueryId { get; set;}
+    
     public int? LessonId { get; set; }
     
     public Subgroup? Subgroup { get; set; }
@@ -35,6 +37,8 @@ public partial class Schedule
     public virtual Discipline? Discipline { get; set; }
 
     public virtual OtherDiscipline? OtherDiscipline { get; set; }
+    
+    public virtual Query? Query { get; set; }
 
     public virtual LessonsTime? LessonTime { get; set; }
     

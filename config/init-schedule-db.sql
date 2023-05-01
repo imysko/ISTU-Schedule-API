@@ -97,7 +97,8 @@ CREATE TABLE public.groups (
     group_id integer NOT NULL,
     name text,
     course integer,
-    institute_id integer
+    institute_id integer,
+    is_active boolean
 );
 
 
@@ -203,11 +204,26 @@ CREATE TABLE public.other_disciplines (
     other_discipline_id integer NOT NULL,
     discipline_title text,
     is_online boolean DEFAULT false,
-    type integer
+    type integer,
+    is_active boolean,
+    project_active boolean,
+    projfair_project_id integer
 );
 
 
 ALTER TABLE public.other_disciplines OWNER TO imysko;
+
+--
+-- Name: queries; Type: TABLE; Schema: public; Owner: imysko
+--
+
+CREATE TABLE public.queries (
+    query_id integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE public.queries OWNER TO imysko;
 
 --
 -- Name: schedule; Type: TABLE; Schema: public; Owner: imysko
@@ -226,7 +242,8 @@ CREATE TABLE public.schedule (
     lesson_type integer,
     date date,
     schedule_type text,
-    other_discipline_id integer
+    other_discipline_id integer,
+    query_id integer
 );
 
 
@@ -382,7 +399,7 @@ COPY public.disciplines (discipline_id, title, real_title) FROM stdin;
 -- Data for Name: groups; Type: TABLE DATA; Schema: public; Owner: imysko
 --
 
-COPY public.groups (group_id, name, course, institute_id) FROM stdin;
+COPY public.groups (group_id, name, course, institute_id, is_active) FROM stdin;
 \.
 
 
@@ -406,7 +423,15 @@ COPY public.lessons_time (lesson_number, begtime, endtime, lesson_id) FROM stdin
 -- Data for Name: other_disciplines; Type: TABLE DATA; Schema: public; Owner: imysko
 --
 
-COPY public.other_disciplines (other_discipline_id, discipline_title, is_online, type) FROM stdin;
+COPY public.other_disciplines (other_discipline_id, discipline_title, is_online, type, is_active, project_active, projfair_project_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: queries; Type: TABLE DATA; Schema: public; Owner: imysko
+--
+
+COPY public.queries (query_id, description) FROM stdin;
 \.
 
 
@@ -414,7 +439,7 @@ COPY public.other_disciplines (other_discipline_id, discipline_title, is_online,
 -- Data for Name: schedule; Type: TABLE DATA; Schema: public; Owner: imysko
 --
 
-COPY public.schedule (schedule_id, groups_verbose, teachers_verbose, classroom_id, classroom_verbose, discipline_id, discipline_verbose, lesson_id, subgroup, lesson_type, date, schedule_type, other_discipline_id) FROM stdin;
+COPY public.schedule (schedule_id, groups_verbose, teachers_verbose, classroom_id, classroom_verbose, discipline_id, discipline_verbose, lesson_id, subgroup, lesson_type, date, schedule_type, other_discipline_id, query_id) FROM stdin;
 \.
 
 
@@ -540,6 +565,14 @@ ALTER TABLE ONLY public.other_disciplines
 
 
 --
+-- Name: queries query_pkey; Type: CONSTRAINT; Schema: public; Owner: imysko
+--
+
+ALTER TABLE ONLY public.queries
+    ADD CONSTRAINT query_pkey PRIMARY KEY (query_id);
+
+
+--
 -- Name: schedule schedule_pkey; Type: CONSTRAINT; Schema: public; Owner: imysko
 --
 
@@ -585,6 +618,14 @@ ALTER TABLE ONLY public.schedule
 
 ALTER TABLE ONLY public.schedule
     ADD CONSTRAINT other_discipline_fk FOREIGN KEY (other_discipline_id) REFERENCES public.other_disciplines(other_discipline_id);
+
+
+--
+-- Name: schedule query_fk; Type: FK CONSTRAINT; Schema: public; Owner: imysko
+--
+
+ALTER TABLE ONLY public.schedule
+    ADD CONSTRAINT query_fk FOREIGN KEY (query_id) REFERENCES public.queries(query_id);
 
 
 --

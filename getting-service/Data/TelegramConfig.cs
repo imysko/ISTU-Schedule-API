@@ -6,5 +6,4 @@ public class TelegramConfig
     public string ApiHash { get; set; }
     public string PhoneNumber { get; set; }
     public string ChatBotId { get; set; }
-    public string LoginCode { get; set; }
 }
