@@ -18,4 +18,8 @@ public partial class Teacher
     [JsonIgnore]
     [SwaggerSchema(WriteOnly = true)]
     public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
+    
+    [JsonIgnore]
+    [SwaggerSchema(WriteOnly = true)]
+    public virtual ICollection<Schedule> Schedules { get; set; }
 }

@@ -17,6 +17,8 @@ public partial class Group
 
     [SwaggerSchema(Description = "institute Id of the group")]
     public int? InstituteId { get; set; }
+    
+    public bool? IsActive { get; set; }
 
     [SwaggerSchema(Description = "information about institute")]
     public virtual Institute? Institute { get; set; }
@@ -24,4 +26,8 @@ public partial class Group
     [JsonIgnore]
     [SwaggerSchema(WriteOnly = true)]
     public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
+    
+    [JsonIgnore]
+    [SwaggerSchema(WriteOnly = true)]
+    public virtual ICollection<Schedule> Schedules { get; set; }
 }

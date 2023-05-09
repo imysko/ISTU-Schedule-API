@@ -1,4 +1,5 @@
 ﻿using API.Data.Enums;
+using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.DataBase.Models;
@@ -29,6 +30,9 @@ public partial class Schedule
     
     [SwaggerSchema(Description = "other discipline Id")]
     public int? OtherDisciplineId { get; set; }
+    
+    [SwaggerSchema(Description = "query Id")]
+    public int? QueryId { get; set;}
 
     [SwaggerSchema(Description = "lesson time Id")]
     public int? LessonId { get; set; }
@@ -53,13 +57,24 @@ public partial class Schedule
     
     [SwaggerSchema(Description = "information about other discipline")]
     public virtual OtherDiscipline? OtherDiscipline { get; set; }
+    
+    [SwaggerSchema(Description = "information about query")]
+    public virtual Query? Query { get; set; }
 
     [SwaggerSchema(Description = "information about lesson time")]
     public virtual LessonsTime? LessonTime { get; set; }
     
-    [SwaggerSchema(Description = "list of groups")]
+    [JsonIgnore]
+    [SwaggerSchema(WriteOnly = true)]
     public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
     
-    [SwaggerSchema(Description = "list of teachers")]
+    [JsonIgnore]
+    [SwaggerSchema(WriteOnly = true)]
     public virtual ICollection<ScheduleTeacher> ScheduleTeachers { get; set; }
+    
+    [SwaggerSchema(Description = "list of groups")]
+    public virtual ICollection<Group> Groups { get; set; }
+    
+    [SwaggerSchema(Description = "list of teachers")]
+    public virtual ICollection<Teacher> Teachers { get; set; }
 }

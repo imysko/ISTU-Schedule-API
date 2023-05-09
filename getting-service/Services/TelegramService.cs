@@ -144,6 +144,7 @@ public class TelegramService : BackgroundService
                 await SendMessageToBot("/api/disciplines");
                 await SendMessageToBot("/api/lessons_time");
                 await SendMessageToBot("/api/other_disciplines");
+                await SendMessageToBot("/api/queries");
                 await SendMessageToBot("/api/schedule/two_weeks");
                 break;
             case "lessons time":

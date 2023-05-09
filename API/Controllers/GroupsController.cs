@@ -27,11 +27,12 @@ namespace API.Controllers
             return instituteId switch
             {
                 null => await _context.Groups
+                    .Where(g => g.IsActive == true)
                     .OrderBy(g => g.InstituteId)
                     .ThenBy(g => g.Name)
                     .ToListAsync(),
                 _ => await _context.Groups
-                    .Where(g => g.InstituteId == instituteId)
+                    .Where(g => g.IsActive == true && g.InstituteId == instituteId)
                     .OrderBy(g => g.Course)
                     .ThenBy(g => g.Name)
                     .ToListAsync()
@@ -47,7 +48,9 @@ namespace API.Controllers
         {
             var group = await _context.Groups
                 .Include(g => g.Institute)
+                .Where(g => g.IsActive == true)
                 .FirstOrDefaultAsync(g => g.GroupId == id);
+            
             return group == null ? NotFound() : group;
         }
     }

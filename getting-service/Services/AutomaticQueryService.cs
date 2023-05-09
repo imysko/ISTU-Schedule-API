@@ -79,6 +79,7 @@ public class AutomaticQueryService : BackgroundService
         Program.MessageQueue.Enqueue("teachers");
         Program.MessageQueue.Enqueue("disciplines");
         Program.MessageQueue.Enqueue("other disciplines");
+        Program.MessageQueue.Enqueue("queries");
         Program.MessageQueue.Enqueue("schedule three months");
         return Task.CompletedTask;
     }

@@ -24,6 +24,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<OtherDiscipline>>> GetOtherDisciplines()
         {
             return await _context.OtherDisciplines
+                .Where(d => d.IsActive == true && d.ProjectActive == true)
                 .OrderBy(d => d.DisciplineTitle)
                 .ToListAsync();
         }

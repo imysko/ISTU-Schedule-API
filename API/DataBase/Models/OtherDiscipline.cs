@@ -18,6 +18,12 @@ public partial class OtherDiscipline
     
     [SwaggerSchema(Description = "type of the discipline")]
     public OtherDisciplineType? Type { get; set; }
+    
+    public bool? IsActive { get; set; }
+    
+    public bool? ProjectActive { get; set; }
+    
+    public int? ProjfairProjectId { get; set; }
 
     [JsonIgnore]
     [SwaggerSchema(WriteOnly = true)]
