@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using getting_service.Data.Enums;
 using getting_service.Data.Models;
 using getting_service.DataBase.Context;
 using getting_service.DataBase.Models;
@@ -392,7 +393,7 @@ public class ScheduleDbController
 
         return classroom?.ClassroomId;
     }
-    
+
     private async Task<OtherDiscipline> ConvertOtherDisciplineResponseToOtherDiscipline(OtherDisciplineResponse otherDisciplineResponse)
     {
         return new OtherDiscipline()
@@ -412,6 +413,7 @@ public class ScheduleDbController
         var classroomId = await FindClassroomId(scheduleResponse);
         var scheduleGroups = await FindScheduleGroups(scheduleResponse);
         var scheduleTeachers = await FindScheduleTeachers(scheduleResponse);
+        var otherDiscipline = await _context.OtherDisciplines.FindAsync(scheduleResponse.OtherDisciplineId);
 
         return new Schedule
         {
@@ -426,7 +428,8 @@ public class ScheduleDbController
             QueryId = scheduleResponse.QueryId,
             LessonId = scheduleResponse.LessonId,
             Subgroup = scheduleResponse.Subgroup,
-            LessonType = scheduleResponse.LessonType,
+            LessonType = scheduleResponse.LessonType != LessonType.Unknown ? scheduleResponse.LessonType : 
+                otherDiscipline?.Type == OtherDisciplineType.Project ? LessonType.Project : LessonType.Unknown,
             Date = DateOnly.ParseExact(scheduleResponse.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture),
             ScheduleGroups = scheduleGroups,
             ScheduleTeachers = scheduleTeachers
