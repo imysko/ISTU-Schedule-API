@@ -20,8 +20,8 @@ public class ScheduleResponse
     [JsonProperty("teachers_verbose")]
     public string? TeachersVerbose { get; set; }
     
-    [JsonProperty("auditories_ids")]
-    public ICollection<int?>? ClassroomsIds { get; set; }
+    [JsonProperty("auditories_id")]
+    public int? ClassroomsId { get; set; }
     
     [JsonProperty("auditories_verbose")]
     public string? ClassroomsVerbose { get; set; }

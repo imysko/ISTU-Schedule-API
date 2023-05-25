@@ -387,10 +387,10 @@ public class ScheduleDbController
 
     private async Task<int?> FindClassroomId(ScheduleResponse schedule)
     {
-        if (schedule.ClassroomsIds == null) return null;
+        if (schedule.ClassroomsId == null) return null;
 
         var classroom =
-            await _context.Classrooms.FirstOrDefaultAsync(c => schedule.ClassroomsIds.Contains(c.ClassroomId));
+            await _context.Classrooms.FirstOrDefaultAsync(c => c.ClassroomId == schedule.ClassroomsId);
 
         return classroom?.ClassroomId;
     }
