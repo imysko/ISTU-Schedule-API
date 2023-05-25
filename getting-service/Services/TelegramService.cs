@@ -145,6 +145,7 @@ public class TelegramService : BackgroundService
                 await SendMessageToBot("/api/lessons_time");
                 await SendMessageToBot("/api/other_disciplines");
                 await SendMessageToBot("/api/queries");
+                Thread.Sleep((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
                 await SendMessageToBot("/api/schedule/two_weeks");
                 break;
             case "lessons time":

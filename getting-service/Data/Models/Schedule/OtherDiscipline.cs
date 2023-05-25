@@ -1,8 +1,7 @@
 using getting_service.Data.Enums;
-using getting_service.DataBase.Models;
 using Newtonsoft.Json;
 
-namespace getting_service.Data.Models;
+namespace getting_service.Data.Models.Schedule;
 
 public partial class OtherDisciplineResponse
 {

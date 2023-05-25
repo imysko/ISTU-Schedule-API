@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
+using getting_service.Clients;
 using getting_service.Data.Enums;
-using getting_service.Data.Models;
+using getting_service.Data.Models.Schedule;
 using getting_service.DataBase.Context;
 using getting_service.DataBase.Models;
 using Microsoft.EntityFrameworkCore;
@@ -396,6 +397,10 @@ public class ScheduleDbController
 
     private async Task<OtherDiscipline> ConvertOtherDisciplineResponseToOtherDiscipline(OtherDisciplineResponse otherDisciplineResponse)
     {
+        var projfairProject = otherDisciplineResponse is { Type: OtherDisciplineType.Project, IsActive: true }
+            ? await ProjfairClient.FindProject(otherDisciplineResponse.DisciplineTitle)
+            : null;
+
         return new OtherDiscipline()
         {
             OtherDisciplineId = otherDisciplineResponse.OtherDisciplineId,
@@ -404,7 +409,7 @@ public class ScheduleDbController
             Type = otherDisciplineResponse.Type,
             IsActive = otherDisciplineResponse.IsActive,
             ProjectActive = otherDisciplineResponse.ProjectActive,
-            ProjfairProjectId = null
+            ProjfairProjectId = projfairProject?.Id
         };
     }
 
@@ -428,8 +433,9 @@ public class ScheduleDbController
             QueryId = scheduleResponse.QueryId,
             LessonId = scheduleResponse.LessonId,
             Subgroup = scheduleResponse.Subgroup,
-            LessonType = scheduleResponse.LessonType != LessonType.Unknown ? scheduleResponse.LessonType : 
-                otherDiscipline?.Type == OtherDisciplineType.Project ? LessonType.Project : LessonType.Unknown,
+            LessonType = scheduleResponse.LessonType != LessonType.Unknown ? scheduleResponse.LessonType :
+                otherDiscipline is { Type: OtherDisciplineType.Project, IsActive: true } ? LessonType.Project :
+                LessonType.Unknown,
             Date = DateOnly.ParseExact(scheduleResponse.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture),
             ScheduleGroups = scheduleGroups,
             ScheduleTeachers = scheduleTeachers

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace getting_service;
@@ -42,8 +43,7 @@ internal static class Program
                 => hostingContext.Configuration.GetSection(TelegramSection).Bind(options));
             
             services.AddSingleton<IOptionsMonitor<TelegramConfig>, OptionsMonitor<TelegramConfig>>();
-
-            Console.WriteLine(hostingContext.Configuration.GetConnectionString("ScheduleDB"));
+            
             services.AddDbContext<ScheduleDbContext>(options =>
                 options.UseNpgsql(hostingContext.Configuration.GetConnectionString("ScheduleDB")));
 
@@ -51,6 +51,11 @@ internal static class Program
             services.AddHostedService<SocatService>();
             services.AddHostedService<AutomaticQueryService>();
             services.AddHostedService<DatabaseService>();
+        });
+
+        builder.ConfigureLogging((context, loggingBuilder) =>
+        {
+            loggingBuilder.AddConsole();
         });
 
         await builder.RunConsoleAsync();

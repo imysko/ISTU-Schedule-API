@@ -37,6 +37,7 @@ namespace API.Controllers
                         {
                             CourseNumber = c.Key,
                             Groups = c
+                                .Where(g => g.IsActive == true)
                                 .OrderBy(g => g.Name)
                                 .ToList()
                         })
@@ -66,6 +67,7 @@ namespace API.Controllers
                         {
                             CourseNumber = c.Key,
                             Groups = c
+                                .Where(g => g.IsActive == true)
                                 .OrderBy(g => g.Name)
                                 .ToList()
                         })
