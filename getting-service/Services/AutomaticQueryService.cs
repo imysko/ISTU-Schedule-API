@@ -66,6 +66,7 @@ public class AutomaticQueryService : BackgroundService
 
     private Task RunDailyTask()
     {
+        Program.MessageQueue.Enqueue("queries");
         Program.MessageQueue.Enqueue("schedule two weeks");
         return Task.CompletedTask;
     }

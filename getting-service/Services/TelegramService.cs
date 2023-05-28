@@ -171,6 +171,7 @@ public class TelegramService : BackgroundService
                 break;
             case "queries":
                 await SendMessageToBot("/api/queries");
+                Thread.Sleep((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
                 break;
             case "schedule two weeks":
                 await SendMessageToBot("/api/schedule/two_weeks");
