@@ -399,7 +399,11 @@ namespace API.Controllers
                                     if (s.Query is not { RelatedQueriesId: not null }) return s;
                                     
                                     var queryId = s.Query.RelatedQueriesId.First(id => id != s.Query.QueryId); 
-                                    s.Query.ReplacedSchedule = await _context.Schedules.FirstAsync(sh => sh.QueryId == queryId);
+                                    s.Query.ReplacedSchedule = await _context.Schedules
+                                        .Include(sh => sh.LessonTime)
+                                        .Include(sh => sh.Discipline)
+                                        .Include(sh => sh.Classroom)
+                                        .FirstAsync(sh => sh.QueryId == queryId);
                                     return s;
                                 })
                                 .Select(t => t.Result)

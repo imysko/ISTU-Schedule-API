@@ -52,6 +52,22 @@ public class ScheduleChangesController : ControllerBase
             .Where(s => s.Date >= dateFrom)
             .OrderByDescending(c => c.Date)
             .ToListAsync();
+        
+        changes = changes.Select(async s =>
+        {
+            if (s.Query is not { RelatedQueriesId: not null }) return s;
+                                    
+            var queryId = s.Query.RelatedQueriesId.First(id => id != s.Query.QueryId); 
+            s.Query.ReplacedSchedule = await _context.Schedules
+                .Include(sh => sh.LessonTime)
+                .Include(sh => sh.Discipline)
+                .Include(sh => sh.Classroom)
+                .FirstAsync(sh => sh.QueryId == queryId);
+
+            return s;
+        })
+        .Select(l => l.Result)
+        .ToList();
 
         return changes.Any() ? Ok(changes) : NotFound();
     }
@@ -88,6 +104,22 @@ public class ScheduleChangesController : ControllerBase
             .Where(s => s.Date >= dateFrom)
             .OrderByDescending(c => c.Date)
             .ToListAsync();
+        
+        changes = changes.Select(async s =>
+            {
+                if (s.Query is not { RelatedQueriesId: not null }) return s;
+                                    
+                var queryId = s.Query.RelatedQueriesId.First(id => id != s.Query.QueryId); 
+                s.Query.ReplacedSchedule = await _context.Schedules
+                    .Include(sh => sh.LessonTime)
+                    .Include(sh => sh.Discipline)
+                    .Include(sh => sh.Classroom)
+                    .FirstAsync(sh => sh.QueryId == queryId);
+
+                return s;
+            })
+            .Select(l => l.Result)
+            .ToList();
 
         return changes.Any() ? Ok(changes) : NotFound();
     }
