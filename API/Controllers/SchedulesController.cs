@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.DataBase.Context;
 using API.DataBase.Models;
+using NuGet.Packaging;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
@@ -54,6 +55,7 @@ namespace API.Controllers
                 .Include(s => s.Discipline)
                 .Include(s => s.OtherDiscipline)
                 .Include(s => s.Query)
+                .ThenInclude(q => q.AffectedSchedule)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -91,6 +93,7 @@ namespace API.Controllers
              .Include(s => s.Discipline)
              .Include(s => s.OtherDiscipline)
              .Include(s => s.Query)
+             .ThenInclude(q => q.AffectedSchedule)
              .Include(s => s.LessonTime)
              .Include(s => s.ScheduleGroups)
              .ThenInclude(sg => sg.Group)
@@ -127,6 +130,7 @@ namespace API.Controllers
                 .Include(s => s.Discipline)
                 .Include(s => s.OtherDiscipline)
                 .Include(s => s.Query)
+                .ThenInclude(q => q.AffectedSchedule)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -163,6 +167,7 @@ namespace API.Controllers
                 .Include(s => s.Discipline)
                 .Include(s => s.OtherDiscipline)
                 .Include(s => s.Query)
+                .ThenInclude(q => q.AffectedSchedule)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -200,6 +205,7 @@ namespace API.Controllers
              .Include(s => s.Discipline)
              .Include(s => s.OtherDiscipline)
              .Include(s => s.Query)
+             .ThenInclude(q => q.AffectedSchedule)
              .Include(s => s.LessonTime)
              .Include(s => s.ScheduleGroups)
              .ThenInclude(sg => sg.Group)
@@ -236,6 +242,7 @@ namespace API.Controllers
                 .Include(s => s.Discipline)
                 .Include(s => s.OtherDiscipline)
                 .Include(s => s.Query)
+                .ThenInclude(q => q.AffectedSchedule)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -272,6 +279,7 @@ namespace API.Controllers
                 .Include(s => s.Discipline)
                 .Include(s => s.OtherDiscipline)
                 .Include(s => s.Query)
+                .ThenInclude(q => q.AffectedSchedule)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -309,6 +317,7 @@ namespace API.Controllers
              .Include(s => s.Discipline)
              .Include(s => s.OtherDiscipline)
              .Include(s => s.Query)
+             .ThenInclude(q => q.AffectedSchedule)
              .Include(s => s.LessonTime)
              .Include(s => s.ScheduleGroups)
              .ThenInclude(sg => sg.Group)
@@ -345,6 +354,7 @@ namespace API.Controllers
                 .Include(s => s.Discipline)
                 .Include(s => s.OtherDiscipline)
                 .Include(s => s.Query)
+                .ThenInclude(q => q.AffectedSchedule)
                 .Include(s => s.LessonTime)
                 .Include(s => s.ScheduleGroups)
                 .ThenInclude(sg => sg.Group)
@@ -362,7 +372,7 @@ namespace API.Controllers
             return studDays.Any()? Ok(studDays) : NotFound();
         }
         
-        private static List<StudyDay> GroupSchedule(IEnumerable<IGrouping<DateOnly, Schedule>> schedules)
+        private List<StudyDay> GroupSchedule(IEnumerable<IGrouping<DateOnly, Schedule>> schedules)
         {
             return schedules
                 .Select(d => new StudyDay
@@ -375,6 +385,24 @@ namespace API.Controllers
                         {
                             Time = l.Key!,
                             Schedules = l
+                                .Where(s => s.Query is not 
+                                    { Type: QueryType.Move or QueryType.MoveFrom or QueryType.MoveTo }
+                                )
+                                .OrderBy(s => s.Subgroup)
+                                .ToList(),
+                            Changes = l
+                                .Where(s => 
+                                    s.Query is { Type: QueryType.Move or QueryType.MoveFrom or QueryType.MoveTo }
+                                )
+                                .Select(async s =>
+                                {
+                                    if (s.Query is not { RelatedQueriesId: not null }) return s;
+                                    
+                                    var queryId = s.Query.RelatedQueriesId.First(id => id != s.Query.QueryId); 
+                                    s.Query.ReplacedSchedule = await _context.Schedules.FirstAsync(sh => sh.QueryId == queryId);
+                                    return s;
+                                })
+                                .Select(t => t.Result)
                                 .OrderBy(s => s.Subgroup)
                                 .ToList()
                         })

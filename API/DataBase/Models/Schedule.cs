@@ -66,6 +66,10 @@ public partial class Schedule
     
     [JsonIgnore]
     [SwaggerSchema(WriteOnly = true)]
+    public virtual ICollection<Query> ReplacementQueries { get; set; }
+    
+    [JsonIgnore]
+    [SwaggerSchema(WriteOnly = true)]
     public virtual ICollection<ScheduleGroup> ScheduleGroups { get; set; }
     
     [JsonIgnore]

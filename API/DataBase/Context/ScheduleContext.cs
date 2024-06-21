@@ -82,6 +82,15 @@ public partial class ScheduleContext : DbContext
 
             entity.Property(e => e.QueryId).HasColumnName("query_id");
             entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.AffectedScheduleId).HasColumnName("affected_schedule_id");
+            entity.Property(e => e.RelatedQueriesId).HasColumnName("related_queries_ids");
+            
+            entity.HasOne(e => e.AffectedSchedule)
+                .WithMany(e => e.ReplacementQueries)
+                .HasForeignKey(d => d.AffectedScheduleId)
+                .HasConstraintName("queries_schedule_schedule_id_fk");
         });
         
         modelBuilder.Entity<Group>(entity =>
